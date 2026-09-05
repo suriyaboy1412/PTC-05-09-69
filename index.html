@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบการเงิน-บัญชี วิทยาลัยเทคนิคพนมสารคาม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plan:#8B5E34;      /* ฝ่ายแผน - น้ำตาล */
+    --store:#E63946;     /* ฝ่ายพัสดุ - แดง */
+    --fin:#FF7A00;       /* ฝ่ายการเงิน - ส้ม */
+    --acct:#FFC93C;      /* ฝ่ายบัญชี - เหลือง */
+    --deposit:#12B8A6;   /* เงินรับฝาก - เขียวเทอควอยซ์ */
+    --bks:#8E5CF7;       /* บกศ - ม่วง */
+    --gfmis:#3D7DFF;     /* GFMIS - น้ำเงิน */
+    --ink:#1F2530;
+    --paper:#FBF9F4;
+    --card:#ffffff;
+    --line:#E7E2D8;
+    --good:#16A34A;
+    --bad:#DC2626;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Sarabun','Prompt',sans-serif;
+    background:
+      radial-gradient(circle at 90% -10%, rgba(61,125,255,.10), transparent 40%),
+      radial-gradient(circle at -10% 20%, rgba(142,92,247,.10), transparent 40%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  h1,h2,h3,.brand{font-family:'Prompt',sans-serif;}
+  a{text-decoration:none;color:inherit;}
+
+  /* ===== Top bar ===== */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:linear-gradient(120deg,#1F2530,#2b2440);
+    color:#fff;padding:14px 22px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    box-shadow:0 4px 18px rgba(0,0,0,.15);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;}
+  .brand .logo{
+    width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(135deg,var(--fin),var(--gfmis));
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  }
+  .brand small{display:block;font-weight:400;font-size:.72rem;opacity:.8;}
+  .searchwrap{flex:1;min-width:220px;display:flex;gap:8px;}
+  .searchwrap input{
+    flex:1;padding:10px 14px;border-radius:12px;border:none;font-family:inherit;font-size:.95rem;
+    background:rgba(255,255,255,.12);color:#fff;
+  }
+  .searchwrap input::placeholder{color:rgba(255,255,255,.6);}
+  .searchwrap button{
+    padding:10px 16px;border:none;border-radius:12px;background:var(--fin);color:#fff;
+    font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .searchwrap button:hover{filter:brightness(1.08);}
+
+  nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 22px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:40;}
+  .navbtn{
+    padding:9px 16px;border-radius:999px;border:2px solid var(--line);background:#fff;
+    font-weight:600;font-size:.88rem;cursor:pointer;font-family:inherit;color:var(--ink);
+    display:flex;align-items:center;gap:6px;transition:.15s;
+  }
+  .navbtn:hover{border-color:currentColor;}
+  .navbtn.active{color:#fff;border-color:transparent;}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 18px 70px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ===== Hero / quick links (dashboard) ===== */
+  .hero{
+    background:linear-gradient(135deg,#20263a,#3c2f57 60%,#1e3a63);
+    color:#fff;border-radius:24px;padding:30px 30px;margin-bottom:22px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;
+  }
+  .hero h1{margin:0 0 6px;font-size:1.5rem;}
+  .hero p{margin:0;opacity:.85;font-size:.92rem;max-width:520px;}
+  .hero .stat{text-align:right;}
+  .hero .stat .num{font-size:1.9rem;font-weight:700;font-family:'Prompt';}
+  .hero .stat .lbl{font-size:.78rem;opacity:.75;}
+
+  .quicklinks{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px;}
+  .qcard{
+    border-radius:var(--radius);padding:18px 20px;color:#fff;cursor:pointer;border:none;
+    text-align:left;font-family:inherit;position:relative;overflow:hidden;
+    box-shadow:0 8px 20px -8px rgba(0,0,0,.35);transition:.18s;
+  }
+  .qcard:hover{transform:translateY(-3px);box-shadow:0 14px 26px -10px rgba(0,0,0,.4);}
+  .qcard .ic{font-size:1.6rem;}
+  .qcard .ti{font-weight:700;font-size:1.02rem;margin:8px 0 2px;}
+  .qcard .sub{font-size:.78rem;opacity:.9;}
+  .qcard .bal{font-family:'Prompt';font-weight:700;font-size:1.15rem;margin-top:10px;}
+
+  .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;}
+  .card h3{margin:0 0 14px;font-size:1.05rem;display:flex;align-items:center;gap:8px;}
+
+  /* donut */
+  .donutrow{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .donut{width:150px;height:150px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;position:relative;}
+  .donut .hole{width:92px;height:92px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut .hole b{font-family:'Prompt';font-size:1rem;}
+  .donut .hole span{font-size:.65rem;color:#666;}
+  .legend{display:flex;flex-direction:column;gap:8px;font-size:.85rem;}
+  .legend .row{display:flex;align-items:center;gap:8px;}
+  .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+  .deptlegend{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .deptchip{padding:5px 12px;border-radius:999px;font-size:.76rem;font-weight:600;color:#fff;}
+
+  /* ===== Section headers ===== */
+  .sectionhead{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+    padding:18px 20px;border-radius:var(--radius);color:#fff;margin-bottom:16px;
+  }
+  .sectionhead h2{margin:0;font-size:1.2rem;}
+  .sectionhead .desc{font-size:.8rem;opacity:.9;margin-top:2px;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+  .toolbar input, .toolbar select{
+    padding:9px 12px;border-radius:10px;border:1px solid var(--line);font-family:inherit;font-size:.88rem;
+  }
+  .btn{
+    padding:9px 16px;border-radius:10px;border:none;font-weight:600;font-size:.86rem;
+    cursor:pointer;font-family:inherit;color:#fff;
+  }
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink);}
+
+  table{width:100%;border-collapse:collapse;font-size:.86rem;background:#fff;border-radius:14px;overflow:hidden;}
+  thead th{
+    background:#F3F1EA;text-align:left;padding:10px 12px;font-weight:600;font-size:.78rem;
+    color:#555;position:sticky;top:0;
+  }
+  tbody td{padding:9px 12px;border-top:1px solid #F0EEE7;}
+  tfoot td{padding:11px 12px;border-top:2px solid rgba(255,255,255,.25);}
+  tbody tr:hover{background:#FAFAF6;}
+  .code{font-family:'Prompt';font-weight:600;padding:3px 9px;border-radius:8px;font-size:.76rem;display:inline-block;}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .pos{color:var(--good);font-weight:600;}
+  .neg{color:var(--bad);font-weight:600;}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;}
+  .badge{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;color:#fff;white-space:nowrap;}
+
+  .summary3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+  @media(max-width:700px){.summary3{grid-template-columns:1fr 1fr;}}
+  .sumbox{border-radius:14px;padding:14px 16px;color:#fff;}
+  .sumbox .l{font-size:.75rem;opacity:.85;}
+  .sumbox .v{font-family:'Prompt';font-weight:700;font-size:1.15rem;margin-top:2px;}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(20,20,25,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:20px;padding:24px;max-width:480px;width:100%;max-height:88vh;overflow:auto;}
+  .modal h3{margin-top:0;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:4px;color:#555;}
+  .field input, .field select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--line);font-family:inherit;font-size:.9rem;}
+  .modalbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+
+  .searchresults{position:fixed;top:120px;right:20px;width:340px;max-height:70vh;overflow:auto;
+    background:#fff;border-radius:16px;box-shadow:0 20px 50px -12px rgba(0,0,0,.35);border:1px solid var(--line);
+    z-index:90;display:none;padding:8px;}
+  .searchresults.show{display:block;}
+  .searchresults .sr-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;}
+  .searchresults .sr-item{padding:10px 12px;border-radius:10px;cursor:pointer;font-size:.84rem;}
+  .searchresults .sr-item:hover{background:#F3F1EA;}
+  .searchresults .sr-item .c{font-weight:700;font-family:'Prompt';}
+  .searchresults .none{padding:20px;text-align:center;color:#888;font-size:.85rem;}
+  .flash{outline:3px solid var(--fin);}
+
+  footer{text-align:center;padding:26px;color:#8a8578;font-size:.78rem;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">🏫</div>
+    <div>ระบบการเงิน-บัญชี<br><small>วิทยาลัยเทคนิคพนมสารคาม | ปีงบประมาณ 2569</small></div>
+  </div>
+  <div class="searchwrap">
+    <input id="globalSearch" placeholder="ค้นหารหัส เช่น บฝ.018, R022, บบ.001/69 ..." onkeydown="if(event.key==='Enter')doSearch()">
+    <button onclick="doSearch()">🔎 ค้นหา</button>
+  </div>
+</header>
+
+<nav>
+  <button class="navbtn active" style="background:#20263a" onclick="showView('dash',this)">📊 แดชบอร์ด</button>
+  <button class="navbtn" style="--c:var(--deposit)" onclick="showView('deposit',this)">💰 เงินรับฝาก-เงินประกัน</button>
+  <button class="navbtn" style="--c:var(--bks)" onclick="showView('bks',this)">🏦 เงินรายได้สถานศึกษา (บกศ.)</button>
+  <button class="navbtn" style="--c:var(--plan)" onclick="showView('budget',this)">📑 งบประมาณตามรหัส (GFMIS)</button>
+  <button class="navbtn" style="--c:var(--gfmis)" onclick="showView('gfmis',this)">🏛️ บัญชีเงินงบประมาณ (ธนาคาร)</button>
+</nav>
+
+<div class="searchresults" id="searchResults"></div>
+
+<main>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section class="view active" id="view-dash">
+    <div class="hero">
+      <div>
+        <h1>ภาพรวมการเงิน-บัญชี ปีงบประมาณ 2569</h1>
+        <p>วิทยาลัยเทคนิคพนมสารคาม — ข้อมูลจากบัญชีเงินรับฝาก-เงินประกัน, บัญชีเงินรายได้สถานศึกษา (บกศ.) และรายงานสถานะการเบิกจ่ายงบประมาณ GFMIS</p>
+      </div>
+      <div class="stat">
+        <div class="num" id="heroTotal">-</div>
+        <div class="lbl">ยอดคงเหลือรวมทุกบัญชี (บาท)</div>
+      </div>
+    </div>
+
+    <div class="quicklinks">
+      <button class="qcard" style="background:linear-gradient(135deg,var(--deposit),#0a8a7d)" onclick="showView('deposit')">
+        <div class="ic">💰</div>
+        <div class="ti">เงินรับฝากและเงินประกัน</div>
+        <div class="sub">บัญชีกระแสรายวัน 203-6-02342-8 (เงินรับฝาก)</div>
+        <div class="bal" id="qDeposit">-</div>
+      </button>
+      <button class="qcard" style="background:linear-gradient(135deg,var(--bks),#5b32c9)" onclick="showView('bks')">
+        <div class="ic">🏦</div>
+        <div class="ti">เงินรายได้สถานศึกษา (บกศ.)</div>
+        <div class="sub">บัญชีกระแสรายวัน 203-6-02134-4</div>
+        <div class="bal" id="qBks">-</div>
+      </button>
+      <button class="qcard" style="background:linear-gradient(135deg,var(--gfmis),#1d4fd6)" onclick="showView('gfmis')">
+        <div class="ic">🏛️</div>
+        <div class="ti">บัญชีเงินงบประมาณ (ธนาคาร)</div>
+        <div class="sub">บัญชี 203-6-02133-6 (เงินงบประมาณ)</div>
+        <div class="bal" id="qGfmis">-</div>
+      </button>
+      <button class="qcard" style="background:linear-gradient(135deg,var(--plan),#5c3d20)" onclick="showView('budget')">
+        <div class="ic">📑</div>
+        <div class="ti">งบประมาณตามรหัส GFMIS</div>
+        <div class="sub">งบสุทธิ - ใบสั่งซื้อ - เบิกจ่าย = คงเหลือ</div>
+        <div class="bal" id="qBudgetItems">-</div>
+      </button>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>🥧 สัดส่วนการใช้จ่ายงบประมาณ GFMIS</h3>
+        <div class="donutrow">
+          <div class="donut" id="donutBudget"><div class="hole"><b id="donutBudgetPct">-</b><span>เบิกจ่ายแล้ว</span></div></div>
+          <div class="legend" id="legendBudget"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>💵 ยอดคงเหลือรายบัญชีธนาคาร</h3>
+        <div id="barAccounts"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎨 ผังสีหน่วยงานที่รับผิดชอบ</h3>
+      <div class="deptlegend">
+        <span class="deptchip" style="background:var(--plan)">ฝ่ายแผน</span>
+        <span class="deptchip" style="background:var(--store)">ฝ่ายพัสดุ</span>
+        <span class="deptchip" style="background:var(--fin)">ฝ่ายการเงิน</span>
+        <span class="deptchip" style="background:var(--acct)">ฝ่ายบัญชี</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DEPOSIT / GUARANTEE ================= -->
+  <section class="view" id="view-deposit">
+    <div class="sectionhead" style="background:linear-gradient(120deg,var(--deposit),#0a8a7d)">
+      <div>
+        <h2>💰 เงินรับฝากและเงินประกัน</h2>
+        <div class="desc">รหัสฝาก R xxx (เรียงวันที่น้อย→มาก) · รหัสถอน บฝ.xxx (เรียงวันที่น้อย→มาก) · บัญชี 203-6-02342-8</div>
+      </div>
+      <button class="btn" style="background:#fff;color:var(--deposit)" onclick="openAdd('deposit')">＋ อัปเดทข้อมูล</button>
+    </div>
+
+    <div class="summary3">
+      <div class="sumbox" style="background:var(--good)"><div class="l">ยอดฝากรวม</div><div class="v" id="depSumIn">-</div></div>
+      <div class="sumbox" style="background:var(--bad)"><div class="l">ยอดถอนรวม</div><div class="v" id="depSumOut">-</div></div>
+      <div class="sumbox" style="background:var(--deposit)"><div class="l">ยอดคงเหลือ</div><div class="v" id="depSumBal">-</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="depFilter" placeholder="กรองด้วยรหัส/รายการ..." oninput="renderDeposit()">
+      <select id="depSort" onchange="renderDeposit()">
+        <option value="asc">เรียงวันที่ น้อย→มาก</option>
+        <option value="desc">เรียงวันที่ มาก→น้อย</option>
+      </select>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>วัน/เดือน/ปี</th><th>รายการ</th><th class="num">ยอดฝาก</th><th class="num">ยอดถอน</th><th>เลขชุด/รหัส</th><th>หน่วยงาน</th></tr></thead>
+        <tbody id="depositTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= BKS ================= -->
+  <section class="view" id="view-bks">
+    <div class="sectionhead" style="background:linear-gradient(120deg,var(--bks),#5b32c9)">
+      <div>
+        <h2>🏦 เงินรายได้สถานศึกษา (บกศ.)</h2>
+        <div class="desc">ฝากผ่านเช็ก → R xxx · ฝากไม่ผ่านเช็ก → Pay-xxx · ถอน → บบ.xxx / บย.xxx · บัญชี 203-6-02134-4</div>
+      </div>
+      <button class="btn" style="background:#fff;color:var(--bks)" onclick="openAdd('bks')">＋ อัปเดทข้อมูล</button>
+    </div>
+
+    <div class="summary3">
+      <div class="sumbox" style="background:var(--bks)"><div class="l">ยอดคงเหลือ ณ รายการล่าสุดในตาราง (4 ก.ย. 2569)</div><div class="v" id="bksBalEndAug">-</div></div>
+      <div class="sumbox" style="background:#5b32c9"><div class="l">ยอดคงเหลือปัจจุบัน (Ledger ณ 4 ก.ย. 2569)</div><div class="v">1,752,107.86 บาท</div></div>
+      <div class="sumbox" style="background:#3f2178"><div class="l">สาขา</div><div class="v" style="font-size:.95rem">พนมสารคาม (Krungthai) · 203-6-02134-4</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="bksFilter" placeholder="กรองด้วยรหัส/รายการ/เลขที่เช็ค..." oninput="renderBks()">
+      <select id="bksMonth" onchange="renderBks()">
+        <option value="">ทุกเดือน (257 รายการ)</option>
+        <option value="05">พ.ค. 2569</option>
+        <option value="06">มิ.ย. 2569</option>
+        <option value="07">ก.ค. 2569</option>
+        <option value="08">ส.ค. 2569</option>
+        <option value="09">ก.ย. 2569</option>
+      </select>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>วันที่</th><th>รหัสธุรกรรม</th><th>รายการ/คำอธิบาย</th><th>เลขที่เช็ค/อ้างอิง</th><th class="num">ถอน</th><th class="num">ฝาก</th><th class="num">คงเหลือ</th></tr></thead>
+        <tbody id="bksTbody"></tbody>
+      </table>
+    </div>
+    <p style="font-size:.78rem;color:#888;margin-top:10px">* ทุกรายการถอดจาก Statement ธนาคารกรุงไทย บัญชี 203-6-02134-4 เดือน พ.ค.–ก.ย. 2569 (ถึง 4 ก.ย.) ครบ 257 รายการ — ยอดฝากรวม/ถอนรวมของแต่ละช่วงตรวจสอบแล้วตรงกับยอดควบคุมท้ายใบ Statement ทุกฉบับ (100%) ยอดคงเหลือล่าสุด 1,752,107.86 บาท ตรงกับ Ledger Balance ของธนาคาร ณ 4 ก.ย. 2569 — กดปุ่ม "อัปเดทข้อมูล" เพื่อเพิ่มเมื่อได้รับเอกสารรอบถัดไป</p>
+  </section>
+
+  <!-- ================= BUDGET CODE TABLE (separate from bank account) ================= -->
+  <section class="view" id="view-budget">
+    <div class="sectionhead" style="background:linear-gradient(120deg,var(--plan),#5c3d20)">
+      <div>
+        <h2>📑 งบประมาณตามรหัส GFMIS</h2>
+        <div class="desc">รายงานสถานะการเบิกจ่ายงบประมาณตามค่ารหัสงบประมาณ NFMA46 · ปีงบประมาณ 2569 (แยกจากบัญชีเงินงบประมาณธนาคาร)</div>
+      </div>
+      <button class="btn" style="background:#fff;color:var(--plan)" onclick="openAdd('gfmis')">＋ อัปเดทข้อมูล</button>
+    </div>
+
+    <div class="summary3" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      <div class="sumbox" style="background:var(--fin)"><div class="l">งบสุทธิรวม</div><div class="v" id="gfSumNet">-</div></div>
+      <div class="sumbox" style="background:#7A4A00"><div class="l">การสำรองเงินรวม</div><div class="v" id="gfSumReserve">-</div></div>
+      <div class="sumbox" style="background:#555"><div class="l">ใบสั่งซื้อ/สัญญารวม</div><div class="v" id="gfSumPO">-</div></div>
+      <div class="sumbox" style="background:var(--bad)"><div class="l">เบิกจ่ายรวม</div><div class="v" id="gfSumSpent">-</div></div>
+      <div class="sumbox" style="background:var(--good)"><div class="l">งบคงเหลือรวม</div><div class="v" id="gfSumLeft">-</div></div>
+    </div>
+
+    <h3 style="margin:22px 0 10px">📋 รายการงบประมาณแยกตามรหัส (คำนวณอัตโนมัติ: งบสุทธิ − การสำรองเงิน − ใบสั่งซื้อ − เบิกจ่าย = งบคงเหลือ)</h3>
+    <div class="toolbar">
+      <input id="gfFilter" placeholder="กรองด้วยรหัส/ชื่อรายการ..." oninput="renderGfmis()">
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>รหัสงบประมาณ</th><th>ชื่อรายการ</th><th class="num">งบสุทธิ</th><th class="num">การสำรองเงิน</th><th class="num">ใบสั่งซื้อ/สัญญา</th><th class="num">เบิกจ่าย</th><th class="num">งบคงเหลือ</th></tr></thead>
+        <tbody id="gfmisTbody"></tbody>
+        <tfoot><tr id="gfmisFootRow" style="background:#20263a;color:#fff;font-weight:700">
+          <td colspan="2">** รวมงบประมาณ (<span id="gfFootCount">-</span> รายการ)</td>
+          <td class="num" id="gfFootNet">-</td>
+          <td class="num" id="gfFootReserve">-</td>
+          <td class="num" id="gfFootPO">-</td>
+          <td class="num" id="gfFootSpent">-</td>
+          <td class="num" id="gfFootLeft">-</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <p style="font-size:.78rem;color:#888;margin-top:10px">* ถอดจากรายงาน "สถานะการเบิกจ่ายงบประมาณตามค่ารหัสงบประมาณ NFMA46" ฉบับเต็ม ปีงบประมาณ 2569 ครบทั้ง 34 รหัสงบประมาณจริง ทุกคอลัมน์ (งบสุทธิ / การสำรองเงิน / ใบสั่งซื้อ / เบิกจ่าย / งบคงเหลือ) เป็นตัวเลขจริงจากรายงาน ไม่มีรายการประมาณการอีกต่อไป — ตรวจสอบแล้วว่าทุกแถวตรงตามสูตร งบสุทธิ − การสำรองเงิน − ใบสั่งซื้อ − เบิกจ่าย = งบคงเหลือ และยอดรวมทุกคอลัมน์ตรงกับยอดรวมทางการ 100%: งบสุทธิรวม 37,390,528.00 / การสำรองเงินรวม 4,500,000.00 / ใบสั่งซื้อรวม 57,785.00 / เบิกจ่ายรวม 29,608,699.58 / งบคงเหลือรวม 3,224,043.42 บาท</p>
+  </section>
+
+  <!-- ================= GFMIS BANK ACCOUNT (separate from budget-code table) ================= -->
+  <section class="view" id="view-gfmis">
+    <div class="sectionhead" style="background:linear-gradient(120deg,var(--gfmis),#1d4fd6)">
+      <div>
+        <h2>🏛️ บัญชีเงินงบประมาณ (ธนาคาร)</h2>
+        <div class="desc">บัญชีกระแสรายวัน 203-6-02133-6 · การเดินบัญชีจริงกับธนาคารกรุงไทย (แยกจากตารางงบประมาณตามรหัส)</div>
+      </div>
+      <button class="btn" style="background:#fff;color:var(--gfmis)" onclick="openAdd('gfmisacct')">＋ อัปเดทข้อมูล</button>
+    </div>
+
+    <div class="summary3">
+      <div class="sumbox" style="background:var(--gfmis)"><div class="l">ยอดคงเหลือปัจจุบัน (Ledger ณ 4 ก.ย. 2569)</div><div class="v" id="gfAcctBal">-</div></div>
+      <div class="sumbox" style="background:#1d4fd6"><div class="l">จำนวนรายการ</div><div class="v" id="gfAcctCount">-</div></div>
+      <div class="sumbox" style="background:#173d99"><div class="l">สาขา</div><div class="v" style="font-size:.95rem">พนมสารคาม (Krungthai) · 203-6-02133-6</div></div>
+    </div>
+
+    <h3 style="margin:22px 0 10px">🏦 รายการเดินบัญชีเงินฝากธนาคาร</h3>
+    <div class="toolbar">
+      <input id="gfAcctFilter" placeholder="กรองด้วยรหัสธุรกรรม/รายการ/เลขที่เช็ค..." oninput="renderGfmisAcct()">
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>วันที่</th><th>รหัสธุรกรรม</th><th>รายการ/คำอธิบาย</th><th>เลขที่เช็ค/อ้างอิง</th><th class="num">ถอน</th><th class="num">ฝาก</th><th class="num">คงเหลือ</th></tr></thead>
+        <tbody id="gfmisAcctTbody"></tbody>
+      </table>
+    </div>
+    <p style="font-size:.78rem;color:#888;margin-top:10px">* ทุกรายการถอดจาก Statement ธนาคารกรุงไทย บัญชี 203-6-02133-6 (เงินงบประมาณ) เดือน ส.ค.–ก.ย. 2569 (ถึง 4 ก.ย.) ครบ 91 รายการ — ยอดรวมฝาก/ถอนตรวจสอบแล้วตรงกับยอดควบคุม (Total Cr./Dr.) ท้ายรายงาน และยอดคงเหลือสุดท้ายตรงกับ Ledger Balance 268,510.44 บาท (100%)</p>
+  </section>
+
+</main>
+
+<footer>ระบบการเงิน-บัญชี วิทยาลัยเทคนิคพนมสารคาม · ออกแบบตามคู่มือ FAM pammodel · ข้อมูลตัวอย่างจากเอกสารที่แนบ</footer>
+
+<!-- ===== Add-record modal ===== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">เพิ่มรายการ</h3>
+    <div id="modalFields"></div>
+    <div class="modalbtns">
+      <button class="btn ghost" onclick="closeAdd()">ยกเลิก</button>
+      <button class="btn" id="modalSaveBtn" style="background:var(--fin)" onclick="saveAdd()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ storage shim ============
+   Claude's artifact runtime provides window.storage. When this file runs on an
+   ordinary web server (GitHub Pages, Netlify, a school server, etc.) that API
+   does not exist, so we polyfill it with the browser's localStorage. This keeps
+   the "อัปเดทข้อมูล" buttons working everywhere — note that with localStorage,
+   added records are saved only on that visitor's own device/browser, not shared
+   with every visitor. For data shared across everyone, a real backend/database
+   is required (see the note at the end of this reply). */
+if(!window.storage){
+  window.storage = {
+    async get(key){
+      const v = localStorage.getItem('pamfin::'+key);
+      return v===null ? null : {key, value:v, shared:false};
+    },
+    async set(key, value){
+      localStorage.setItem('pamfin::'+key, value);
+      return {key, value, shared:false};
+    },
+    async delete(key){
+      localStorage.removeItem('pamfin::'+key);
+      return {key, deleted:true, shared:false};
+    },
+    async list(prefix){
+      const keys=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(k && k.startsWith('pamfin::'+(prefix||''))) keys.push(k.replace('pamfin::',''));
+      }
+      return {keys, shared:false};
+    }
+  };
+}
+
+/* ============ helpers ============ */
+const fmt = n => (n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const bahtOnly = n => (n||0).toLocaleString('th-TH',{maximumFractionDigits:0});
+
+function deptOf(code){
+  code = (code||'').trim();
+  if(/^ชุด|^\d{3}\/\d{2}$/.test(code)) return {name:'ฝ่ายพัสดุ',color:'var(--store)'};
+  if(/^R\d/.test(code)) return {name:'ฝ่ายการเงิน',color:'var(--fin)'};
+  if(/^(บฝ|บบ|บย|ชบย|ภษ|บน|บอ|บร|Pay|ฎีกา)/i.test(code)) return {name:'ฝ่ายการเงิน',color:'var(--fin)'};
+  if(/^\d{18,}/.test(code)) return {name:'ฝ่ายแผน',color:'var(--plan)'};
+  return {name:'ฝ่ายบัญชี',color:'var(--acct)'};
+}
+function deptBadge(code){
+  const d = deptOf(code);
+  return `<span class="badge" style="background:${d.color}">${d.name}</span>`;
+}
+function codeChip(code){
+  const d = deptOf(code);
+  return `<span class="code" style="background:${d.color}22;color:${d.color};border:1px solid ${d.color}55">${code||'-'}</span>`;
+}
+
+/* ============ seed data ============ */
+/* เงินรับฝากและเงินประกัน — full ledger from attachment */
+let depositData = [
+ {date:'2025-10-09',desc:'ถอน',in:0,out:5000,code:'บฝ.001/69'},
+ {date:'2025-10-09',desc:'ถอน',in:0,out:10000,code:'บฝ.003/69'},
+ {date:'2025-10-27',desc:'ถอน',in:0,out:10000,code:'บฝ.004/69'},
+ {date:'2025-10-29',desc:'รับฝาก',in:7000,out:0,code:''},
+ {date:'2025-10-31',desc:'ถอน',in:0,out:5000,code:'บฝ.005/69'},
+ {date:'2025-11-10',desc:'ถอน',in:0,out:5000,code:'บฝ.006/69'},
+ {date:'2025-11-18',desc:'รับฝาก - ครุภัณฑ์ ห้องบัญชี',in:3490000,out:0,code:'R022'},
+ {date:'2025-11-18',desc:'รับฝาก - ครุภัณฑ์ CEFR',in:1865000,out:0,code:'R023'},
+ {date:'2025-11-20',desc:'ถอน',in:0,out:5000,code:'บฝ.007/69'},
+ {date:'2025-11-21',desc:'รับฝาก',in:4000,out:0,code:''},
+ {date:'2025-11-26',desc:'รับฝาก',in:7000,out:0,code:''},
+ {date:'2025-12-17',desc:'ถอน',in:0,out:1000,code:'บฝ.010/69'},
+ {date:'2025-12-22',desc:'รับฝาก - VEC สอศ.',in:60000,out:0,code:'R024'},
+ {date:'2025-12-22',desc:'ถอน',in:0,out:5000,code:'บฝ.011/69'},
+ {date:'2025-12-22',desc:'ถอน',in:0,out:5000,code:'บฝ.012/69'},
+ {date:'2025-12-26',desc:'รับฝาก - ค้ำประกันสัญญา',in:7000,out:0,code:''},
+ {date:'2026-01-12',desc:'รับฝาก - สอบ V-Net',in:31181,out:0,code:'R040'},
+ {date:'2026-01-19',desc:'ถอน',in:0,out:5000,code:'บฝ.013/69'},
+ {date:'2026-01-19',desc:'ถอน',in:0,out:3000,code:'บฝ.014/69'},
+ {date:'2026-01-19',desc:'ถอน',in:0,out:10000,code:'บฝ.015/69'},
+ {date:'2026-01-28',desc:'รับฝาก - ค้ำประกันสัญญา',in:9000,out:0,code:''},
+ {date:'2026-02-03',desc:'รับฝาก - VEC Fix it Center',in:52824,out:0,code:'R036'},
+ {date:'2026-02-06',desc:'รับฝาก',in:3000,out:0,code:''},
+ {date:'2026-02-25',desc:'รับฝาก - ค้ำประกันสัญญา',in:11000,out:0,code:''},
+ {date:'2026-02-27',desc:'ถอน',in:0,out:5000,code:'ชุด 081/69'},
+ {date:'2026-03-06',desc:'ถอน',in:0,out:56.07,code:'ชุด 084/69'},
+ {date:'2026-03-13',desc:'ถอน',in:0,out:5943.93,code:'ชุด 084/69'},
+ {date:'2026-03-13',desc:'ถอน',in:0,out:10000,code:'บฝ.018/69'},
+ {date:'2026-03-19',desc:'ถอน',in:0,out:3360,code:'บฝ.019/69'},
+ {date:'2026-03-19',desc:'ถอน',in:0,out:59400,code:'บฝ.016/69'},
+ {date:'2026-03-19',desc:'ถอน',in:0,out:694,code:'บฝ.020/69'},
+ {date:'2026-03-19',desc:'ถอน',in:0,out:14859.81,code:'ชุด 083/69'},
+ {date:'2026-03-25',desc:'ถอน',in:0,out:23200,code:'บฝ.021/69'},
+ {date:'2026-03-27',desc:'ถอน',in:0,out:6664,code:'ชุด 082/69'},
+ {date:'2026-03-27',desc:'ถอน',in:0,out:740.19,code:'บฝ.016/69'},
+ {date:'2026-03-27',desc:'รับฝาก',in:7000,out:0,code:''},
+ {date:'2026-03-27',desc:'รับฝาก',in:3000,out:0,code:''},
+ {date:'2026-04-03',desc:'ถอน',in:0,out:16800,code:'บฝ.022/69'},
+ {date:'2026-04-20',desc:'ถอน',in:0,out:5295046.72,code:'ชุด 070, 057'},
+ {date:'2026-04-28',desc:'ถอน',in:0,out:49953.28,code:'ชุด 070, 057'},
+ {date:'2026-04-28',desc:'รับฝาก - ค้ำประกันสัญญา',in:9000,out:0,code:''},
+ {date:'2026-05-28',desc:'รับฝาก - ค้ำประกันสัญญา',in:13000,out:0,code:''},
+ {date:'2026-06-11',desc:'รับฝาก',in:1000,out:0,code:''},
+ {date:'2026-06-15',desc:'ถอน',in:0,out:5000,code:'บฝ.024/69'},
+ {date:'2026-06-30',desc:'รับฝาก - ค้ำประกันสัญญา',in:13000,out:0,code:''},
+ {date:'2026-07-14',desc:'ถอน',in:0,out:8265,code:'ชุด 085/69'},
+ {date:'2026-07-21',desc:'รับฝาก - ค้ำประกันสัญญา',in:14000,out:0,code:''},
+ {date:'2026-07-22',desc:'ถอน',in:0,out:10000,code:'บฝ.027-28/69'},
+ {date:'2026-08-21',desc:'ถอน',in:0,out:10000,code:'บฝ.026/69'},
+ {date:'2026-08-25',desc:'ถอน',in:0,out:10000,code:'บฝ.031/69'},
+ {date:'2026-08-27',desc:'รับฝาก',in:12000,out:0,code:''},
+ {date:'2026-09-04',desc:'รับฝาก - Thai-Austrian (วิทยาลัยเทคนิคสัตหีบ)',in:20000,out:0,code:''},
+];
+const depositOpening = 820871.11;
+
+/* บกศ. — บัญชีกระแสรายวัน 203-6-02134-4 : ทุกรายการจาก Statement พ.ค.-ส.ค. 2569 (243 รายการ) */
+/* ยอดรวมฝาก/ถอนตรวจสอบแล้วตรงกับยอดควบคุมท้าย Statement ของทุกเดือน */
+let bksData = [
+ {date:'2026-05-01',desc:'ยอดยกมา',check:'',out:0,in:0,bal:362878.14,code:'',month:'05'},
+ {date:'2026-05-01',desc:'ถอนเช็ค',check:'2030712183/10299254',out:14096.0,in:0,bal:348782.14,code:'CWTRC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:378782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:408782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:438782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:468782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:498782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:528782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:558782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:588782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:618782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:648782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:678782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:708782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:738782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:768782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:798782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:828782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:858782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:888782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:918782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:948782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:978782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1008782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1038782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1068782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1098782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1128782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1158782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1188782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1218782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1248782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-01',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:22000.0,bal:1270782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-05',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1300782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-05',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1330782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-05',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:1360782.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-05',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:27300.0,bal:1388082.14,code:'ATDDC',month:'05'},
+ {date:'2026-05-06',desc:'ถอนเช็ค',check:'2031549340/10299232',out:4200.0,in:0,bal:1383882.14,code:'CWTRC',month:'05'},
+ {date:'2026-05-06',desc:'ฝากเงินสด',check:'',out:0,in:141100.0,bal:1524982.14,code:'CDCH',month:'05'},
+ {date:'2026-05-07',desc:'ถอนเช็ค',check:'2030310603/10299255',out:5760.0,in:0,bal:1519222.14,code:'CWTRC',month:'05'},
+ {date:'2026-05-08',desc:'ฝากเงินสด',check:'',out:0,in:24150.0,bal:1543372.14,code:'CDCH',month:'05'},
+ {date:'2026-05-11',desc:'ฝากเงินสด',check:'',out:0,in:28600.0,bal:1571972.14,code:'CDCH',month:'05'},
+ {date:'2026-05-12',desc:'ฝากเงินสด',check:'',out:0,in:22700.0,bal:1594672.14,code:'CDCH',month:'05'},
+ {date:'2026-05-14',desc:'ฝากเงินสด',check:'',out:0,in:10900.0,bal:1605572.14,code:'CDCH',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'3570279154/10299257',out:18275.0,in:0,bal:1587297.14,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'0090270126/10299239',out:3050.0,in:0,bal:1584247.14,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030771139/10299237',out:164.49,in:0,bal:1584082.65,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030771139/10299267',out:166.67,in:0,bal:1583915.98,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030416274/10299235',out:6425.6,in:0,bal:1577490.38,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030771139/10299262',out:718.5,in:0,bal:1576771.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030370509/10299264',out:9900.0,in:0,bal:1566871.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030512419/10299265',out:6600.0,in:0,bal:1560271.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ถอนเช็ค',check:'2030125113/10299269',out:77760.0,in:0,bal:1482511.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-15',desc:'ฝากเงินสด',check:'',out:0,in:18580.0,bal:1501091.88,code:'CDCH',month:'05'},
+ {date:'2026-05-18',desc:'ฝากเงินสด',check:'',out:0,in:221800.0,bal:1722891.88,code:'CDCH',month:'05'},
+ {date:'2026-05-18',desc:'ถอนเช็ค',check:'9858489552/10299268',out:22320.0,in:0,bal:1700571.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-18',desc:'ถอนเช็ค',check:'2030266280/10299259',out:4900.0,in:0,bal:1695671.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-20',desc:'ฝากเงินสด',check:'',out:0,in:57655.0,bal:1753326.88,code:'CDCH',month:'05'},
+ {date:'2026-05-21',desc:'ฝากเงินสด',check:'',out:0,in:39550.0,bal:1792876.88,code:'CDCH',month:'05'},
+ {date:'2026-05-25',desc:'ฝากเงินสด',check:'',out:0,in:60950.0,bal:1853826.88,code:'CDCH',month:'05'},
+ {date:'2026-05-25',desc:'ถอนเช็ค',check:'2030719943/10299275',out:3360.0,in:0,bal:1850466.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-25',desc:'ถอนเช็ค',check:'2380613885/10299276',out:3360.0,in:0,bal:1847106.88,code:'CWTRC',month:'05'},
+ {date:'2026-05-25',desc:'ถอนเช็ค',check:'10299277',out:12000.0,in:0,bal:1835106.88,code:'CWTPC',month:'05'},
+ {date:'2026-05-25',desc:'ถอน SBK:4 SBR:137',check:'10299271',out:631.3,in:0,bal:1834475.58,code:'CBCA',month:'05'},
+ {date:'2026-05-26',desc:'ถอนเช็ค',check:'2030370509/10299278',out:4790.31,in:0,bal:1829685.27,code:'CWTRC',month:'05'},
+ {date:'2026-05-26',desc:'ฝากเงินสด',check:'',out:0,in:19125.0,bal:1848810.27,code:'CDCH',month:'05'},
+ {date:'2026-05-27',desc:'ฝากเงินสด',check:'',out:0,in:14470.0,bal:1863280.27,code:'CDCH',month:'05'},
+ {date:'2026-05-27',desc:'ถอน SBK:34 SBR:127',check:'10299274',out:1280.0,in:0,bal:1862000.27,code:'CBCA',month:'05'},
+ {date:'2026-05-28',desc:'ฝากเงินสด',check:'',out:0,in:16450.0,bal:1878450.27,code:'CDCH',month:'05'},
+ {date:'2026-05-28',desc:'ถอนเช็ค',check:'2130838057/10299260',out:8862.94,in:0,bal:1869587.33,code:'CWTRC',month:'05'},
+ {date:'2026-05-28',desc:'ถอนเช็ค',check:'2030771139/10299285',out:5032.26,in:0,bal:1864555.07,code:'CWTRC',month:'05'},
+ {date:'2026-05-29',desc:'ถอนเช็ค',check:'2030771139/10299279',out:48.39,in:0,bal:1864506.68,code:'CWTRC',month:'05'},
+ {date:'2026-05-29',desc:'ฝากเงินสด',check:'',out:0,in:53850.0,bal:1918356.68,code:'CDCH',month:'05'},
+ {date:'2026-05-29',desc:'ถอนเช็ค',check:'2030008052/10299284',out:760.0,in:0,bal:1917596.68,code:'CWTRC',month:'05'},
+ {date:'2026-05-29',desc:'ถอนเช็ค',check:'2030601632/10299282',out:3120.0,in:0,bal:1914476.68,code:'CWTRC',month:'05'},
+ {date:'2026-06-01',desc:'ฝากเช็ค',check:'2036021336',out:0,in:29400.0,bal:1943876.68,code:'CDTRC',month:'06'},
+ {date:'2026-06-02',desc:'ฝากเช็ค',check:'2036021336',out:0,in:33120.0,bal:1976996.68,code:'CDTRC',month:'06'},
+ {date:'2026-06-02',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:30000.0,bal:2006996.68,code:'ATDDC',month:'06'},
+ {date:'2026-06-02',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:29000.0,bal:2035996.68,code:'ATDDC',month:'06'},
+ {date:'2026-06-02',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:6000.0,bal:2041996.68,code:'ATDDC',month:'06'},
+ {date:'2026-06-04',desc:'ฝากเงินสด',check:'',out:0,in:30950.0,bal:2072946.68,code:'CDCH',month:'06'},
+ {date:'2026-06-04',desc:'ฝากเช็ค',check:'2036021336',out:0,in:11375.0,bal:2084321.68,code:'CDTRC',month:'06'},
+ {date:'2026-06-04',desc:'ถอน SBK:11 SBR:824',check:'10299233',out:800.0,in:0,bal:2083521.68,code:'CBCA',month:'06'},
+ {date:'2026-06-05',desc:'ถอน SBK:4 SBR:137',check:'10299236',out:19785.51,in:0,bal:2063736.17,code:'CBCA',month:'06'},
+ {date:'2026-06-08',desc:'ฝากเงินสด',check:'',out:0,in:60100.0,bal:2123836.17,code:'CDCH',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2030771139/10299296',out:4707.16,in:0,bal:2119129.01,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'0170254763/10299295',out:488032.48,in:0,bal:1631096.53,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2030626570/10299258',out:560.0,in:0,bal:1630536.53,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'6780169730/10299261',out:27106.2,in:0,bal:1603430.33,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2101328267/10296893',out:49005.0,in:0,bal:1554425.33,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2030626570/10299294',out:960.0,in:0,bal:1553465.33,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2030416274/10299293',out:14955.41,in:0,bal:1538509.92,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'4200791307/10299289',out:1904.0,in:0,bal:1536605.92,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2031581120/10299288',out:420.0,in:0,bal:1536185.92,code:'CWTRC',month:'06'},
+ {date:'2026-06-08',desc:'ถอนเช็ค',check:'2031549340/10299287',out:2520.0,in:0,bal:1533665.92,code:'CWTRC',month:'06'},
+ {date:'2026-06-10',desc:'ถอนเช็ค',check:'2030370509/10299299',out:4694.51,in:0,bal:1528971.41,code:'CWTRC',month:'06'},
+ {date:'2026-06-10',desc:'ฝากเช็ค',check:'2036021336',out:0,in:7080.0,bal:1536051.41,code:'CDTRC',month:'06'},
+ {date:'2026-06-10',desc:'ถอนเช็ค',check:'2030512419/10302144',out:9900.0,in:0,bal:1526151.41,code:'CWTRC',month:'06'},
+ {date:'2026-06-10',desc:'ถอน SBK:34 SBR:127',check:'10299286',out:189.0,in:0,bal:1525962.41,code:'CBCA',month:'06'},
+ {date:'2026-06-11',desc:'ฝากเงินสด',check:'',out:0,in:24750.0,bal:1550712.41,code:'CDCH',month:'06'},
+ {date:'2026-06-11',desc:'ถอนเช็ค',check:'2030771139/10302163',out:519.0,in:0,bal:1550193.41,code:'CWTRC',month:'06'},
+ {date:'2026-06-11',desc:'ถอนเช็ค',check:'2030771139/10302141',out:147.42,in:0,bal:1550045.99,code:'CWTRC',month:'06'},
+ {date:'2026-06-11',desc:'ถอนเช็ค',check:'2030771139/10299298',out:176.95,in:0,bal:1549869.04,code:'CWTRC',month:'06'},
+ {date:'2026-06-11',desc:'ถอนเช็ค',check:'0090270126/10299297',out:17518.05,in:0,bal:1532350.99,code:'CWTRC',month:'06'},
+ {date:'2026-06-11',desc:'ถอนเช็ค',check:'2036023428/10302162',out:1000.0,in:0,bal:1531350.99,code:'CWTRC',month:'06'},
+ {date:'2026-06-12',desc:'ถอนเช็ค',check:'3990487523/10299291',out:626.4,in:0,bal:1530724.59,code:'CWTRC',month:'06'},
+ {date:'2026-06-13',desc:'ถอน SBK:4 SBR:137',check:'10299213',out:3700.0,in:0,bal:1527024.59,code:'CBCA',month:'06'},
+ {date:'2026-06-15',desc:'ฝากเงินสด',check:'',out:0,in:59350.0,bal:1586374.59,code:'CDCH',month:'06'},
+ {date:'2026-06-15',desc:'ถอนเช็ค',check:'2030372099/10302164',out:519.0,in:0,bal:1585855.59,code:'CWTRC',month:'06'},
+ {date:'2026-06-15',desc:'ถอนเช็ค',check:'2220311880/10302148',out:26350.0,in:0,bal:1559505.59,code:'CWTRC',month:'06'},
+ {date:'2026-06-15',desc:'ถอนเช็ค',check:'0090270126/10302146',out:9805.0,in:0,bal:1549700.59,code:'CWTRC',month:'06'},
+ {date:'2026-06-17',desc:'ถอน SBK:4 SBR:137',check:'10302150',out:631.3,in:0,bal:1549069.29,code:'CBCA',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2030719943/10302157',out:4200.0,in:0,bal:1544869.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2031581120/10302155',out:1680.0,in:0,bal:1543189.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2030671665/10302165',out:5000.0,in:0,bal:1538189.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2030626570/10302152',out:525.0,in:0,bal:1537664.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2031581120/10302153',out:3280.0,in:0,bal:1534384.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2031549340/10302159',out:4200.0,in:0,bal:1530184.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'2380613885/10302156',out:4200.0,in:0,bal:1525984.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-18',desc:'ถอนเช็ค',check:'10302158',out:15340.0,in:0,bal:1510644.29,code:'CWTPC',month:'06'},
+ {date:'2026-06-19',desc:'ถอนเช็ค',check:'2030125113/10302166',out:4200.0,in:0,bal:1506444.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-19',desc:'ถอนเช็ค',check:'2031516639/10302169',out:40875.0,in:0,bal:1465569.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-19',desc:'ถอนเช็ค',check:'2031516639/10302182',out:71280.0,in:0,bal:1394289.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-19',desc:'ถอนเช็ค',check:'2030310603/10302168',out:13400.0,in:0,bal:1380889.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-19',desc:'ฝากเงินสด',check:'',out:0,in:5000.0,bal:1385889.29,code:'CDCH',month:'06'},
+ {date:'2026-06-19',desc:'ถอน SBK:11 SBR:824',check:'10299292',out:2000.0,in:0,bal:1383889.29,code:'CBCA',month:'06'},
+ {date:'2026-06-22',desc:'ถอน SBK:34 SBR:127',check:'10302145',out:419.0,in:0,bal:1383470.29,code:'CBCA',month:'06'},
+ {date:'2026-06-23',desc:'ฝากเงินสด',check:'',out:0,in:35700.0,bal:1419170.29,code:'CDCH',month:'06'},
+ {date:'2026-06-24',desc:'ถอนเช็ค',check:'10302170',out:533610.0,in:0,bal:885560.29,code:'CWCH',month:'06'},
+ {date:'2026-06-29',desc:'ฝากเงินสด',check:'',out:0,in:29100.0,bal:914660.29,code:'CDCH',month:'06'},
+ {date:'2026-06-29',desc:'ถอนเช็ค',check:'9837203447/10302187',out:7200.0,in:0,bal:907460.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-29',desc:'ถอนเช็ค',check:'9867030109/10302186',out:7200.0,in:0,bal:900260.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-29',desc:'ถอนเช็ค',check:'6796717503/10302185',out:7200.0,in:0,bal:893060.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-29',desc:'ถอนเช็ค',check:'2031581120/10302167',out:688.0,in:0,bal:892372.29,code:'CWTRC',month:'06'},
+ {date:'2026-06-29',desc:'ถอนเช็ค',check:'2031581120/10302184',out:7242.4,in:0,bal:885129.89,code:'CWTRC',month:'06'},
+ {date:'2026-06-30',desc:'ถอนเช็ค',check:'4200791307/10302183',out:3077.32,in:0,bal:882052.57,code:'CWTRC',month:'06'},
+ {date:'2026-06-30',desc:'ถอนเช็ค',check:'2030671665/10302171',out:10000.0,in:0,bal:872052.57,code:'CWTRC',month:'06'},
+ {date:'2026-06-30',desc:'ฝากเงินสด',check:'',out:0,in:16350.0,bal:888402.57,code:'CDCH',month:'06'},
+ {date:'2026-07-02',desc:'ถอนเช็ค',check:'2030426148/10302160',out:4754.15,in:0,bal:883648.42,code:'CWTRC',month:'07'},
+ {date:'2026-07-02',desc:'ฝากเงินสด',check:'',out:0,in:27720.0,bal:911368.42,code:'CDCH',month:'07'},
+ {date:'2026-07-02',desc:'ถอนเช็ค',check:'2030771139/10302191',out:12000.0,in:0,bal:899368.42,code:'CWTRC',month:'07'},
+ {date:'2026-07-03',desc:'ถอนเช็ค',check:'2030771139/10302181',out:44.85,in:0,bal:899323.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-03',desc:'ถอนเช็ค',check:'2030771139/10302190',out:501.0,in:0,bal:898822.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-07',desc:'ฝากเงินสด',check:'',out:0,in:37000.0,bal:935822.57,code:'CDCH',month:'07'},
+ {date:'2026-07-07',desc:'ถอนเช็ค',check:'2030512419/10302193',out:9900.0,in:0,bal:925922.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-07',desc:'ถอนเช็ค',check:'2031369318/10302174',out:15120.0,in:0,bal:910802.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-07',desc:'ถอนเช็ค',check:'2030416274/10302173',out:1800.0,in:0,bal:909002.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-07',desc:'ถอนเช็ค',check:'2030370509/10302195',out:10395.0,in:0,bal:898607.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-07',desc:'ฝากเช็ค',check:'2036021336',out:0,in:12832.0,bal:911439.57,code:'CDTRC',month:'07'},
+ {date:'2026-07-07',desc:'ฝากเช็ค',check:'2036021336',out:0,in:9240.0,bal:920679.57,code:'CDTRC',month:'07'},
+ {date:'2026-07-09',desc:'ถอนเช็ค',check:'2380613885/10302158',out:3360.0,in:0,bal:917319.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-09',desc:'ถอนเช็ค',check:'2030719943/10302199',out:3360.0,in:0,bal:913959.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-09',desc:'ถอนเช็ค',check:'2220311880/10302200',out:57950.0,in:0,bal:856009.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-09',desc:'ถอนเช็ค',check:'2101328267/10302188',out:36234.0,in:0,bal:819775.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-10',desc:'ถอนเช็ค',check:'2030680427/10302175',out:5040.0,in:0,bal:814735.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-10',desc:'ถอนเช็ค',check:'2030125113/10302201',out:118800.0,in:0,bal:695935.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-10',desc:'ถอนเช็ค',check:'2030707015/10302176',out:369800.0,in:0,bal:326135.57,code:'CWTRC',month:'07'},
+ {date:'2026-07-13',desc:'ฝากเงินสด',check:'',out:0,in:25350.0,bal:351485.57,code:'CDCH',month:'07'},
+ {date:'2026-07-13',desc:'ฝากเช็ค',check:'2036021336',out:0,in:535517.67,bal:887003.24,code:'CDTRC',month:'07'},
+ {date:'2026-07-13',desc:'ฝากเช็ค',check:'2036021336',out:0,in:14096.0,bal:901099.24,code:'CDTRC',month:'07'},
+ {date:'2026-07-14',desc:'ถอน SBK:11 SBR:824',check:'10302151',out:714.0,in:0,bal:900385.24,code:'CBCA',month:'07'},
+ {date:'2026-07-14',desc:'ถอน SBK:11 SBR:824',check:'10302197',out:2011.6,in:0,bal:898373.64,code:'CBCA',month:'07'},
+ {date:'2026-07-14',desc:'ถอน SBK:11 SBR:824',check:'10302192',out:4423.8,in:0,bal:893949.84,code:'CBCA',month:'07'},
+ {date:'2026-07-14',desc:'ถอน SBK:11 SBR:824',check:'10299263',out:6283.0,in:0,bal:887666.84,code:'CBCA',month:'07'},
+ {date:'2026-07-14',desc:'ถอน SBK:11 SBR:824',check:'10299290',out:13803.92,in:0,bal:873862.92,code:'CBCA',month:'07'},
+ {date:'2026-07-14',desc:'ถอน SBK:11 SBR:824',check:'10299266',out:57688.2,in:0,bal:816174.72,code:'CBCA',month:'07'},
+ {date:'2026-07-15',desc:'ฝากเงินสด',check:'',out:0,in:11225.0,bal:827399.72,code:'CDCH',month:'07'},
+ {date:'2026-07-15',desc:'ถอนเช็ค',check:'10302204',out:20000.0,in:0,bal:807399.72,code:'CWTPC',month:'07'},
+ {date:'2026-07-15',desc:'ถอนเช็ค',check:'2030771139/10302196',out:105.0,in:0,bal:807294.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-15',desc:'ถอนเช็ค',check:'6900545440/10302202',out:65216.25,in:0,bal:742078.47,code:'CWTRC',month:'07'},
+ {date:'2026-07-15',desc:'ถอนเช็ค',check:'2030771139/10302203',out:658.75,in:0,bal:741419.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-15',desc:'ถอนเช็ค',check:'2030771139/10302194',out:100.0,in:0,bal:741319.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-16',desc:'ฝากเช็ค',check:'2036021336',out:0,in:477200.0,bal:1218519.72,code:'CDTRC',month:'07'},
+ {date:'2026-07-16',desc:'ฝากเช็ค',check:'2036021336',out:0,in:456000.0,bal:1674519.72,code:'CDTRC',month:'07'},
+ {date:'2026-07-16',desc:'ฝากเช็ค',check:'2036021336',out:0,in:5000.0,bal:1679519.72,code:'CDTRC',month:'07'},
+ {date:'2026-07-16',desc:'ฝากเช็ค',check:'2036021336',out:0,in:4200.0,bal:1683719.72,code:'CDTRC',month:'07'},
+ {date:'2026-07-17',desc:'ถอนเช็ค',check:'2030310603/10302177',out:13000.0,in:0,bal:1670719.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-20',desc:'ฝากผ่าน ATM (K40345)',check:'',out:0,in:12300.0,bal:1683019.72,code:'ATDDC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'2031549340/10302207',out:3360.0,in:0,bal:1679659.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'2031581120/10302205',out:3360.0,in:0,bal:1676299.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'4200791307/10302209',out:1538.66,in:0,bal:1674761.06,code:'CWTRC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'2036023428/10302179',out:14000.0,in:0,bal:1660761.06,code:'CWTRC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'2036021336/10302222',out:592927.34,in:0,bal:1067833.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'2030771139/10302180',out:68377.0,in:0,bal:999456.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-21',desc:'ถอนเช็ค',check:'2290749524/10302206',out:660.0,in:0,bal:998796.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-22',desc:'ฝากเงินสด',check:'',out:0,in:3200.0,bal:1001996.72,code:'CDCH',month:'07'},
+ {date:'2026-07-22',desc:'ถอนเช็ค',check:'3990487523/10302211',out:1812.0,in:0,bal:1000184.72,code:'CWTRC',month:'07'},
+ {date:'2026-07-23',desc:'โอนเข้าบัญชี',check:'004-1243174100',out:0,in:22102.59,bal:1022287.31,code:'IORDDT',month:'07'},
+ {date:'2026-07-24',desc:'ถอนเช็ค',check:'2030416274/10302223',out:1376.0,in:0,bal:1020911.31,code:'CWTRC',month:'07'},
+ {date:'2026-07-24',desc:'ถอนเช็ค',check:'2030721824/10302212',out:12000.0,in:0,bal:1008911.31,code:'CWTRC',month:'07'},
+ {date:'2026-07-27',desc:'ถอน SBK:30 SBR:161',check:'10302221',out:3800.0,in:0,bal:1005111.31,code:'CBCA',month:'07'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021336',out:0,in:519.0,bal:1005630.31,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021336',out:0,in:15120.0,bal:1020750.31,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021336',out:0,in:1800.0,bal:1022550.31,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021336',out:0,in:10381.94,bal:1032932.25,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021336',out:0,in:13000.0,bal:1045932.25,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021336',out:0,in:13400.0,bal:1059332.25,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเงินสด',check:'',out:0,in:31140.0,bal:1090472.25,code:'CDCH',month:'08'},
+ {date:'2026-08-05',desc:'ถอน SBK:34 SBR:127',check:'10302208',out:1271.0,in:0,bal:1089201.25,code:'CBCA',month:'08'},
+ {date:'2026-08-07',desc:'ถอนเช็ค',check:'2030370509/10302215',out:10395.0,in:0,bal:1078806.25,code:'CWTRC',month:'08'},
+ {date:'2026-08-07',desc:'ถอนเช็ค',check:'2030512419/10302214',out:9900.0,in:0,bal:1068906.25,code:'CWTRC',month:'08'},
+ {date:'2026-08-07',desc:'ฝากเงินสด',check:'',out:0,in:32610.0,bal:1101516.25,code:'CDCH',month:'08'},
+ {date:'2026-08-07',desc:'ถอนเช็ค',check:'2030771139/10302216',out:205.0,in:0,bal:1101311.25,code:'CWTRC',month:'08'},
+ {date:'2026-08-07',desc:'ถอนเช็ค',check:'2030771139/10304564',out:391.48,in:0,bal:1100919.77,code:'CWTRC',month:'08'},
+ {date:'2026-08-07',desc:'ถอนเช็ค',check:'2030721824/10302218',out:480.0,in:0,bal:1100439.77,code:'CWTRC',month:'08'},
+ {date:'2026-08-07',desc:'ถอนเช็ค',check:'2030626570/10302213',out:776.0,in:0,bal:1099663.77,code:'CWTRC',month:'08'},
+ {date:'2026-08-11',desc:'ถอน SBK:4 SBR:137',check:'10304562',out:631.3,in:0,bal:1099032.47,code:'CBCA',month:'08'},
+ {date:'2026-08-13',desc:'ถอนเช็ค',check:'2030243523/10302229',out:597400.0,in:0,bal:501632.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-13',desc:'ถอนเช็ค',check:'2030408107/10302228',out:14640.0,in:0,bal:486992.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-13',desc:'ถอนเช็ค',check:'2031511491/10302227',out:120600.0,in:0,bal:366392.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-13',desc:'ถอนเช็ค',check:'2030310603/10302225',out:13600.0,in:0,bal:352792.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-13',desc:'ถอนเช็ค',check:'2031457306/10302226',out:68310.0,in:0,bal:284482.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'2031385666/10302230',out:4320.0,in:0,bal:280162.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ฝากเช็ค',check:'2036021336',out:0,in:109200.0,bal:389362.47,code:'CDTRC',month:'08'},
+ {date:'2026-08-14',desc:'ฝากเช็ค',check:'2036021336',out:0,in:33120.0,bal:422482.47,code:'CDTRC',month:'08'},
+ {date:'2026-08-14',desc:'ฝากเช็ค',check:'2036021336',out:0,in:399000.0,bal:821482.47,code:'CDTRC',month:'08'},
+ {date:'2026-08-14',desc:'ฝากเช็ค',check:'2036021336',out:0,in:29400.0,bal:850882.47,code:'CDTRC',month:'08'},
+ {date:'2026-08-17',desc:'ฝากเงินสด',check:'',out:0,in:80000.0,bal:930882.47,code:'CDCH',month:'08'},
+ {date:'2026-08-17',desc:'ถอนเช็ค',check:'2030719943/10304566',out:3360.0,in:0,bal:927522.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-17',desc:'ถอนเช็ค',check:'2380613885/10304565',out:3360.0,in:0,bal:924162.47,code:'CWTRC',month:'08'},
+ {date:'2026-08-17',desc:'ฝากเช็ค',check:'2036021336',out:0,in:217172.91,bal:1141335.38,code:'CDTRC',month:'08'},
+ {date:'2026-08-17',desc:'ฝากเช็ค',check:'2036021336',out:0,in:10859.0,bal:1152194.38,code:'CDTRC',month:'08'},
+ {date:'2026-08-17',desc:'ฝากเช็ค',check:'2036021336',out:0,in:616584.34,bal:1768778.72,code:'CDTRC',month:'08'},
+ {date:'2026-08-18',desc:'ฝากเงินสด',check:'',out:0,in:14500.0,bal:1783278.72,code:'CDCH',month:'08'},
+ {date:'2026-08-18',desc:'ถอนเช็ค',check:'2220311880/10304567',out:53450.0,in:0,bal:1729828.72,code:'CWTRC',month:'08'},
+ {date:'2026-08-19',desc:'ถอนเช็ค',check:'2290749524/10304570',out:4900.0,in:0,bal:1724928.72,code:'CWTRC',month:'08'},
+ {date:'2026-08-19',desc:'ถอน SBK:4 SBR:137',check:'10304568',out:120114.72,in:0,bal:1604814.0,code:'CBCA',month:'08'},
+ {date:'2026-08-20',desc:'ถอน SBK:14 SBR:5168',check:'10302232',out:1980.0,in:0,bal:1602834.0,code:'CBCA',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2030266280/10302235',out:13750.0,in:0,bal:1589084.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2030125113/10302236',out:3662.0,in:0,bal:1585422.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2030707015/10302210',out:3360.0,in:0,bal:1582062.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'20307908158/10302234',out:3600.0,in:0,bal:1578462.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2101328267/10304563',out:9900.0,in:0,bal:1568562.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'6782506971/10304561',out:15454.21,in:0,bal:1553107.79,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2520071869/10302237',out:6696.0,in:0,bal:1546411.79,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2031581120/10304571',out:2940.0,in:0,bal:1543471.79,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'2031549340/10304572',out:3360.0,in:0,bal:1540111.79,code:'CWTRC',month:'08'},
+ {date:'2026-08-25',desc:'ฝากเงินสด',check:'',out:0,in:20800.0,bal:1560911.79,code:'CDCH',month:'08'},
+ {date:'2026-08-25',desc:'ถอนเช็ค',check:'2030266280/10304575',out:111840.0,in:0,bal:1449071.79,code:'CWTRC',month:'08'},
+ {date:'2026-08-25',desc:'ถอนเช็ค',check:'10304573',out:20802.6,in:0,bal:1428269.19,code:'CWTPC',month:'08'},
+ {date:'2026-08-25',desc:'ถอน SBK:14 SBR:696',check:'10302219',out:370.0,in:0,bal:1427899.19,code:'CBCA',month:'08'},
+ {date:'2026-08-27',desc:'ถอนเช็ค',check:'2100520415/10302238',out:14000.0,in:0,bal:1413899.19,code:'CWTRC',month:'08'},
+ {date:'2026-08-31',desc:'ถอน SBK:4 SBR:137',check:'10302189',out:13365.0,in:0,bal:1400534.19,code:'CBCA',month:'08'},
+ {date:'2026-09-01',desc:'ถอนเช็ค',check:'2030793124/10304574',out:12000.0,in:0,bal:1388534.19,code:'CWTRC',month:'09'},
+ {date:'2026-09-02',desc:'ถอนเช็ค',check:'10304626',out:30599.33,in:0,bal:1357934.86,code:'CWTPC',month:'09'},
+ {date:'2026-09-02',desc:'ฝากเงินสด',check:'',out:0,in:54500.0,bal:1412434.86,code:'CDCH',month:'09'},
+ {date:'2026-09-02',desc:'ถอนเช็ค',check:'0090270126/10304625',out:3520.0,in:0,bal:1408914.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-02',desc:'ถอนเช็ค',check:'0090270126/10304579',out:6200.0,in:0,bal:1402714.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-02',desc:'ฝากเช็ค',check:'2036021336',out:0,in:369800.0,bal:1772514.86,code:'CDTRC',month:'09'},
+ {date:'2026-09-03',desc:'ถอน SBK:34 SBR:127',check:'10304580',out:2867.0,in:0,bal:1769647.86,code:'CBCA',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10302240',out:9160.0,in:0,bal:1760487.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304631',out:260.0,in:0,bal:1760227.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304629',out:1360.0,in:0,bal:1758867.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304632',out:2376.0,in:0,bal:1756491.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304630',out:2488.0,in:0,bal:1754003.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304633',out:896.0,in:0,bal:1753107.86,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10302239',out:1000.0,in:0,bal:1752107.86,code:'CWTRC',month:'09'},
+];
+
+/* GFMIS — รายการงบประมาณตามรหัส ฉบับสมบูรณ์ 100% (34 รายการ) จากรายงาน NFMA46 ปีงบประมาณ 2569 */
+/* ทุกคอลัมน์ (งบสุทธิ/การสำรองเงิน/ใบสั่งซื้อ/เบิกจ่าย/งบคงเหลือ) ถอดจากรายงานฉบับเต็มและตรวจสอบแล้วตรงกับยอดรวมทางการ + สูตรรายบรรทัด 100% ไม่มีรายการประมาณการอีกต่อไป */
+let gfmisData = [
+ {code:'20006060013005000002',name:'ค่าใช้จ่ายโครงการอาชีวะต้านยาเสพติด',net:20000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:8380.0},
+ {code:'20006140004001000000',name:'รายการงบบุคลากร',net:4129130.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:4493610.65},
+ {code:'20006142004002000000',name:'รายการงบดำเนินงาน (รายจ่ายประจำ)',net:154518.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:126518.0},
+ {code:'20006260039003120006',name:'ชุดปฏิบัติการเครื่องจักรซีเอ็นซีสมัยใหม่ พร้อมสื่อการเรียนรู้แบบอินเตอร์แอกทีฟ',net:3600000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:3558900.0},
+ {code:'20006260039005000001',name:'ค่าใช้จ่ายโครงการผลิตและพัฒนากำลังคนสนับสนุนเขตพัฒนาพิเศษภาคตะวันออก',net:95250.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:92800.0},
+ {code:'20006330015004100002',name:'เงินอุดหนุนทุนการศึกษาเฉลิมราชกุมารี',net:70000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:42500.0},
+ {code:'20006330017005000003',name:'ค่าใช้จ่ายโครงการยกระดับและพัฒนาขีดความสามารถด้านภาษาและทักษะดิจิทัล',net:20000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:11600.0},
+ {code:'20006330021003120026',name:'ชุดปฏิบัติการเครื่องจักรกลไฟฟ้ากระแสตรงและกระแสสลับ พร้อมเครื่องกำเนิดไฟฟ้า',net:4500000.0,reserve:4500000.0,po:0,spentKnown:true,estimated:false,spent:0.0},
+ {code:'20006330021003120027',name:'ชุดฝึกปฏิบัติการทดสอบความสามารถทางด้านทักษะ PLC พร้อมระบบสั่งงานด้วยระบบ',net:4659200.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:4659200.0},
+ {code:'20006330021005000002',name:'ค่าใช้จ่ายโครงการพัฒนาทักษะและสมรรถนะวิชาชีพกำลังคน (Reskill - Upskill - Newskill)',net:500000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:493500.0},
+ {code:'20006330028005000001',name:'ค่าใช้จ่ายโครงการพัฒนาทักษะและศักยภาพการจัดการเรียนการสอนอาชีวศึกษา',net:57240.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:37128.0},
+ {code:'20006330038005000001',name:'ค่าใช้จ่ายโครงการพัฒนาศักยภาพผู้เรียนอาชีวศึกษาในการเป็นผู้ประกอบการ',net:37000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:33330.0},
+ {code:'20006330038005000002',name:'ค่าใช้จ่ายโครงการบูรณาการการพัฒนาทักษะทางวิชาชีพกับการเสริมสร้างคุณธรรม',net:85000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:66415.0},
+ {code:'20006330038005000004',name:'ค่าใช้จ่ายโครงการส่งเสริมพัฒนาทักษะวิชาชีพทักษะพื้นฐาน เพื่อพัฒนาศักยภาพผู้เรียน',net:10000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:7080.0},
+ {code:'20006330058005000005',name:'ค่าใช้จ่ายโครงการพัฒนาและยกระดับการติดตามผู้สำเร็จการศึกษาอาชีวศึกษา',net:12000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:0.0},
+ {code:'20006330058005000006',name:'ค่าใช้จ่ายโครงการเพิ่มประสิทธิภาพการบริหารจัดการศึกษาระดับอาชีวศึกษา',net:397440.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:364320.0},
+ {code:'20006330058005000007',name:'ค่าใช้จ่ายโครงการอาชีวศึกษาปลอดภัย',net:10000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:10000.0},
+ {code:'20006330063005000007',name:'ค่าใช้จ่ายโครงการขับเคลื่อนการแก้ไขปัญหาผู้เรียนอาชีวศึกษาออกนอกระบบ',net:100000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:0.0},
+ {code:'20006330065005000001',name:'ค่าใช้จ่ายโครงการขยายและยกระดับการจัดอาชีวศึกษาระบบทวิภาคีคุณภาพสูง',net:325100.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:218660.0},
+ {code:'20006370001005000001',name:'ค่าใช้จ่ายโครงการจัดการอาชีวศึกษาเพื่อสนองพระราชดำริ',net:80000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:80000.0},
+ {code:'20006370003005000001',name:'ค่าใช้จ่ายโครงการจัดหาบุคลากรสนับสนุนเพื่อคืนครูให้นักเรียน',net:352800.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:322503.28},
+ {code:'20006372001002000000',name:'รายการงบดำเนินงาน (รายจ่ายประจำ) - งบพื้นฐาน',net:659300.0,reserve:0,po:57785.0,spentKnown:true,estimated:false,spent:359463.0},
+ {code:'20006372002002000000',name:'รายการงบดำเนินงาน (รายจ่ายประจำ) - เงินอุดหนุนทั่วไป',net:118500.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:0.0},
+ {code:'20006372003002000000',name:'รายการงบดำเนินงาน (รายจ่ายประจำ) - เงินอุดหนุนอื่น',net:3191700.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:1692108.44},
+ {code:'20006450011004100001',name:'ค่าหนังสือเรียน',net:2186000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:1758588.7},
+ {code:'20006450011004100002',name:'ค่าอุปกรณ์การเรียน',net:568360.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:528060.0},
+ {code:'20006450011004100003',name:'ค่าเครื่องแบบนักเรียน',net:1044050.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:1002250.0},
+ {code:'20006450011004100004',name:'ค่ากิจกรรมพัฒนาคุณภาพผู้เรียน',net:1377180.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:510258.28},
+ {code:'20006450011004100005',name:'ค่าจัดการเรียนการสอน',net:9008760.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:8917396.23},
+ {code:'20006600012005000001',name:'ค่าใช้จ่ายโครงการเสริมสร้างคุณธรรมจริยธรรมและธรรมาภิบาลในสถานศึกษา',net:17000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:17000.0},
+ {code:'90909440023000973',name:'ค่ารักษาพยาบาลข้าราชการประเภทคนไข้นอก',net:0.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:2450.0},
+ {code:'90909620002000972',name:'เงินช่วยเหลือการศึกษาและค่าเล่าเรียนบุตรข้าราชการและลูกจ้างประจำ',net:0.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:99200.0},
+ {code:'90909620002000978',name:'เงินช่วยเหลือพิเศษในกรณีข้าราชการและลูกจ้างตายในระหว่างปฏิบัติราชการ',net:0.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:90480.0},
+ {code:'90909650012002210005',name:'ค่าใช้จ่ายในการควบคุมและจัดการเลือกตั้งสมาชิกสภาผู้แทนราษฎร (เลือกตั้งทั่วไป/ออกเสียงประชามติ)',net:5000.0,reserve:0,po:0,spentKnown:true,estimated:false,spent:5000.0},
+];
+/* บัญชีเงินงบประมาณ GFMIS — บัญชี 203-6-02133-6 : ทุกรายการจาก Statement ส.ค. 2569 (76 รายการ) */
+let gfmisAcctData = [
+ {date:'2026-08-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:1800.0,bal:266836.46,code:'BCD14',month:'08'},
+ {date:'2026-08-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:13000.0,bal:279836.46,code:'BCD14',month:'08'},
+ {date:'2026-08-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:6612.6,bal:286449.06,code:'BCD14',month:'08'},
+ {date:'2026-08-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:2354.0,bal:288803.06,code:'BCD14',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2030055751/10296784',out:600.0,in:0,bal:288203.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2030771139/10296774',out:32378.0,in:0,bal:255825.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'3290633853/10296783',out:5580.0,in:0,bal:250245.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2290505919/10296789',out:4800.0,in:0,bal:245445.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021344/10296786',out:519.0,in:0,bal:244926.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021344/10296788',out:15120.0,in:0,bal:229806.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021344/10296790',out:1800.0,in:0,bal:228006.06,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021344/10296791',out:10381.94,in:0,bal:217624.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021336/10296794',out:13000.0,in:0,bal:204624.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค',check:'2036021366',out:0,in:13000.0,bal:217624.12,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค (กลับรายการ)',check:'2036021336/10296794',out:0,in:13000.0,bal:230624.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ฝากเช็ค (กลับรายการ)',check:'2036021366',out:13000.0,in:0,bal:217624.12,code:'CDTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021344/10296794',out:13000.0,in:0,bal:204624.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2030590940/10296795',out:1800.0,in:0,bal:202824.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอนเช็ค',check:'2036021344/10296770',out:13400.0,in:0,bal:189424.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ชำระเงินกู้',check:'10296778',out:24600.0,in:0,bal:164824.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-03',desc:'ถอน SBK:30 SBR:161',check:'10296781',out:2500.0,in:0,bal:162324.12,code:'CBCA',month:'08'},
+ {date:'2026-08-03',desc:'ถอน SBK:30 SBR:161',check:'10296782',out:2500.0,in:0,bal:159824.12,code:'CBCA',month:'08'},
+ {date:'2026-08-03',desc:'ถอน SBK:30 SBR:161',check:'10296780',out:3000.0,in:0,bal:156824.12,code:'CBCA',month:'08'},
+ {date:'2026-08-03',desc:'ถอน SBK:30 SBR:161',check:'10296779',out:6000.0,in:0,bal:150824.12,code:'CBCA',month:'08'},
+ {date:'2026-08-04',desc:'ถอนเช็ค',check:'2101328267/10296769',out:2945.0,in:0,bal:147879.12,code:'CWTRC',month:'08'},
+ {date:'2026-08-04',desc:'ถอน SBK:4 SBR:137',check:'10296793',out:2354.0,in:0,bal:145525.12,code:'CBCA',month:'08'},
+ {date:'2026-08-04',desc:'ถอน SBK:34 SBR:127',check:'10296785',out:129201.09,in:0,bal:16324.03,code:'CBCA',month:'08'},
+ {date:'2026-08-10',desc:'ถอนเช็ค',check:'2030426148/10296773',out:1862.43,in:0,bal:14461.6,code:'CWTRC',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:33120.0,bal:47581.6,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:29400.0,bal:76981.6,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:369800.0,bal:446781.6,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:399000.0,bal:845781.6,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:22816.15,bal:868597.75,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:2200.0,bal:870797.75,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:4100.0,bal:874897.75,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:109200.0,bal:984097.75,code:'BCD14',month:'08'},
+ {date:'2026-08-11',desc:'ถอนเช็ค',check:'2226008721/10296792',out:6612.6,in:0,bal:977485.15,code:'CWTRC',month:'08'},
+ {date:'2026-08-11',desc:'ถอน SBK:4 SBR:137',check:'10296771',out:4700.0,in:0,bal:972785.15,code:'CBCA',month:'08'},
+ {date:'2026-08-14',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:217172.91,bal:1189958.06,code:'BCD14',month:'08'},
+ {date:'2026-08-14',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:587220.34,bal:1777178.4,code:'BCD14',month:'08'},
+ {date:'2026-08-14',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:10859.0,bal:1788037.4,code:'BCD14',month:'08'},
+ {date:'2026-08-14',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:29364.0,bal:1817401.4,code:'BCD14',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'0090270126/10304901',out:4100.0,in:0,bal:1813301.4,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'90270126/10296800',out:2200.0,in:0,bal:1811101.4,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'2036021344/10296797',out:109200.0,in:0,bal:1701901.4,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'2036021344/10296798',out:33120.0,in:0,bal:1668781.4,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'2036021344/10296796',out:399000.0,in:0,bal:1269781.4,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'2036021344/10296799',out:29400.0,in:0,bal:1240381.4,code:'CWTRC',month:'08'},
+ {date:'2026-08-14',desc:'ถอนเช็ค',check:'2031045717/10304902',out:22816.15,in:0,bal:1217565.25,code:'CWTRC',month:'08'},
+ {date:'2026-08-17',desc:'ถอนเช็ค',check:'2036021344/10304904',out:217172.91,in:0,bal:1000392.34,code:'CWTRC',month:'08'},
+ {date:'2026-08-17',desc:'ถอนเช็ค',check:'2036021344/10304905',out:10859.0,in:0,bal:989533.34,code:'CWTRC',month:'08'},
+ {date:'2026-08-17',desc:'ถอนเช็ค',check:'2036021344/10304906',out:616584.34,in:0,bal:372949.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-17',desc:'ถอน SBK:11 SBR:824',check:'10296768',out:3149.0,in:0,bal:369800.0,code:'CBCA',month:'08'},
+ {date:'2026-08-20',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:6305.0,bal:376105.0,code:'BCD14',month:'08'},
+ {date:'2026-08-20',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:5160.0,bal:381265.0,code:'BCD14',month:'08'},
+ {date:'2026-08-20',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:90480.0,bal:471745.0,code:'BCD14',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'0090270126/10304909',out:4275.0,in:0,bal:467470.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-21',desc:'ถอนเช็ค',check:'6612585757/10304910',out:5160.0,in:0,bal:462310.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:28656.0,bal:490966.0,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:29400.0,bal:520366.0,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:6800.0,bal:527166.0,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:3466.0,bal:530632.0,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:425370.0,bal:956002.0,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:573075.19,bal:1529077.19,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:33120.0,bal:1562197.19,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:400.0,bal:1562597.19,code:'BCD14',month:'08'},
+ {date:'2026-08-24',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:800.0,bal:1563397.19,code:'BCD14',month:'08'},
+ {date:'2026-08-26',desc:'โอนเงิน Phanomsarakham',check:'1000012290073',out:937371.19,in:0,bal:626026.0,code:'BPDWT',month:'08'},
+ {date:'2026-08-26',desc:'รับโอน VEC.GO/สอศ.',check:'2',out:0,in:16464.5,bal:642490.5,code:'BCD02',month:'08'},
+ {date:'2026-08-26',desc:'รับโอน VEC.GO/สอศ.',check:'2',out:0,in:135854.25,bal:778344.75,code:'BCD02',month:'08'},
+ {date:'2026-08-27',desc:'โอนเงิน Phanomsarakham',check:'1000012290133',out:145755.75,in:0,bal:632589.0,code:'BPDWT',month:'08'},
+ {date:'2026-08-27',desc:'ถอนเช็ค',check:'2036023428/10304912',out:12000.0,in:0,bal:620589.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-27',desc:'ถอนเช็ค',check:'2220311880/10304915',out:8004.0,in:0,bal:612585.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-27',desc:'ถอนเช็ค',check:'10304914',out:27500.0,in:0,bal:585085.0,code:'CWTRC',month:'08'},
+ {date:'2026-08-27',desc:'ถอน SBK:30 SBR:161',check:'10304913',out:10000.0,in:0,bal:575085.0,code:'CBCA',month:'08'},
+ {date:'2026-08-27',desc:'ถอน SBK:33 SBR:607',check:'10304911',out:33300.0,in:0,bal:541785.0,code:'CBCA',month:'08'},
+ {date:'2026-08-31',desc:'ถอน SBK:4 SBR:137',check:'10304908',out:400.0,in:0,bal:541385.0,code:'CBCA',month:'08'},
+ {date:'2026-09-02',desc:'ถอนเช็ค',check:'2036021344/10304903',out:369800.0,in:0,bal:171585.0,code:'CWTRC',month:'09'},
+ {date:'2026-09-02',desc:'ถอนเช็ค',check:'2031511491/10304917',out:400.0,in:0,bal:171185.0,code:'CWTRC',month:'09'},
+ {date:'2026-09-02',desc:'ถอนเช็ค',check:'2031457306/10304918',out:800.0,in:0,bal:170385.0,code:'CWTRC',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:642.0,bal:171027.0,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:4044.60,bal:175071.60,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:25000.0,bal:200071.60,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:2880.0,bal:202951.60,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:6612.60,bal:209564.20,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:83744.64,bal:293308.84,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:1262.60,bal:294571.44,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'รับโอน GFMIS/กรมบัญชีกลาง',check:'108682',out:0,in:600.0,bal:295171.44,code:'BCD14',month:'09'},
+ {date:'2026-09-03',desc:'ถอน SBK:11 SBR:824',check:'10304907',out:1630.0,in:0,bal:293541.44,code:'CBCA',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304921',out:25000.0,in:0,bal:268541.44,code:'CWTRC',month:'09'},
+ {date:'2026-09-04',desc:'ถอนเช็ค',check:'10304929',out:31.0,in:0,bal:268510.44,code:'CWTRC',month:'09'},
+];
+
+const gfmisTotalNet=37390528.00, gfmisTotalReserve=4500000.00, gfmisTotalPO=57785.00, gfmisTotalSpent=29608699.58, gfmisTotalLeft=3224043.42;
+const bksLedgerBalance=1752107.86, gfmisAccountBalance=268510.44;
+
+/* ============ load persisted additions ============ */
+async function loadExtra(key, arr){
+  try{
+    const r = await window.storage.get(key, false);
+    if(r && r.value){ JSON.parse(r.value).forEach(x=>arr.push(x)); }
+  }catch(e){ /* no saved data yet */ }
+}
+async function initData(){
+  await loadExtra('pam_deposit_extra', depositData);
+  await loadExtra('pam_bks_extra', bksData);
+  await loadExtra('pam_gfmis_extra', gfmisData);
+  await loadExtra('pam_gfmisacct_extra', gfmisAcctData);
+  renderAll();
+}
+
+/* ============ nav ============ */
+function showView(id, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(b=>{
+    b.classList.remove('active'); b.style.background='#fff'; b.style.color='var(--ink)'; b.style.borderColor='var(--line)';
+  });
+  const colors={dash:'#20263a',deposit:'var(--deposit)',bks:'var(--bks)',budget:'var(--plan)',gfmis:'var(--gfmis)'};
+  let btn = el;
+  if(!btn){ btn = [...document.querySelectorAll('.navbtn')].find(b=>b.getAttribute('onclick').includes("'"+id+"'")); }
+  if(btn){ btn.classList.add('active'); btn.style.background=colors[id]; btn.style.color='#fff'; btn.style.borderColor='transparent'; }
+}
+
+/* ============ render: deposit ============ */
+function renderDeposit(){
+  const filter=(document.getElementById('depFilter').value||'').toLowerCase();
+  const sortDir=document.getElementById('depSort').value;
+  let rows=[...depositData];
+  if(filter) rows=rows.filter(r=>(r.code+r.desc).toLowerCase().includes(filter));
+  rows.sort((a,b)=> sortDir==='asc' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date));
+  document.getElementById('depositTbody').innerHTML = rows.map(r=>`
+    <tr id="row-${r.code.replace(/[^a-zA-Z0-9]/g,'')}">
+      <td>${thDate(r.date)}</td><td>${r.desc}</td>
+      <td class="num pos">${r.in? fmt(r.in):''}</td>
+      <td class="num neg">${r.out? fmt(r.out):''}</td>
+      <td>${codeChip(r.code)}</td>
+      <td>${deptBadge(r.code)}</td>
+    </tr>`).join('');
+  const totIn=depositData.reduce((s,r)=>s+r.in,0);
+  const totOut=depositData.reduce((s,r)=>s+r.out,0);
+  document.getElementById('depSumIn').textContent=fmt(totIn)+' บาท';
+  document.getElementById('depSumOut').textContent=fmt(totOut)+' บาท';
+  document.getElementById('depSumBal').textContent=fmt(depositOpening+totIn-totOut)+' บาท';
+  document.getElementById('qDeposit').textContent=fmt(depositOpening+totIn-totOut)+' บ.';
+}
+function thDate(iso){
+  const [y,m,d]=iso.split('-');
+  const months=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${parseInt(d)} ${months[parseInt(m)]} ${parseInt(y)+543}`;
+}
+
+/* ============ render: bks ============ */
+function renderBks(){
+  const filter=(document.getElementById('bksFilter').value||'').toLowerCase();
+  const month=document.getElementById('bksMonth').value;
+  let rows=[...bksData];
+  if(filter) rows=rows.filter(r=>((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(filter));
+  if(month) rows=rows.filter(r=>r.month===month);
+  document.getElementById('bksTbody').innerHTML = rows.map(r=>`
+    <tr id="row-${(r.check||r.code||'').replace(/[^a-zA-Z0-9]/g,'')}">
+      <td>${thDate(r.date)}</td>
+      <td>${codeChip(r.code)}</td>
+      <td>${r.desc}</td>
+      <td>${r.check||'-'}</td>
+      <td class="num neg">${r.out? fmt(r.out):''}</td>
+      <td class="num pos">${r.in? fmt(r.in):''}</td>
+      <td class="num">${fmt(r.bal)}</td>
+    </tr>`).join('');
+  document.getElementById('qBks').textContent=fmt(bksLedgerBalance)+' บ.';
+  const lastRow = bksData[bksData.length-1];
+  document.getElementById('bksBalEndAug').textContent = fmt(lastRow.bal)+' บาท';
+}
+
+/* ============ render: gfmis (budget-code table) ============ */
+function renderGfmis(){
+  const filter=(document.getElementById('gfFilter').value||'').toLowerCase();
+  let rows=[...gfmisData];
+  if(filter) rows=rows.filter(r=>(r.code+r.name).toLowerCase().includes(filter));
+  document.getElementById('gfmisTbody').innerHTML = rows.map(r=>{
+    const left = r.net - r.reserve - r.po - r.spent;
+    const spentCell = `<td class="num neg">${fmt(r.spent)}</td>`;
+    const leftCell = `<td class="num ${left<0?'neg':'pos'}">${fmt(left)}</td>`;
+    return `<tr id="row-${r.code}">
+      <td>${codeChip(r.code)}</td><td>${r.name}</td>
+      <td class="num">${fmt(r.net)}</td>
+      <td class="num">${r.reserve? fmt(r.reserve):'-'}</td>
+      <td class="num">${r.po? fmt(r.po):'-'}</td>
+      ${spentCell}${leftCell}
+    </tr>`;
+  }).join('');
+  // ยอดรวมคำนวณสดจากทุกรายการในตาราง ให้ตรงกับยอดรวมทางการเสมอ
+  const liveNetTotal = gfmisData.reduce((s,r)=>s+r.net,0);
+  const liveReserveTotal = gfmisData.reduce((s,r)=>s+r.reserve,0);
+  const livePoTotal = gfmisData.reduce((s,r)=>s+r.po,0);
+  const liveSpentTotal = gfmisData.reduce((s,r)=>s+r.spent,0);
+  const liveLeftTotal = gfmisData.reduce((s,r)=>s+(r.net-r.reserve-r.po-r.spent),0);
+  document.getElementById('gfSumNet').textContent=fmt(liveNetTotal)+' บาท';
+  document.getElementById('gfSumReserve').textContent=fmt(liveReserveTotal)+' บาท';
+  document.getElementById('gfSumPO').textContent=fmt(livePoTotal)+' บาท';
+  document.getElementById('gfSumSpent').textContent=fmt(liveSpentTotal)+' บาท';
+  document.getElementById('gfSumLeft').textContent=fmt(liveLeftTotal)+' บาท';
+  document.getElementById('gfFootCount').textContent=gfmisData.length;
+  document.getElementById('gfFootNet').textContent=fmt(liveNetTotal);
+  document.getElementById('gfFootReserve').textContent=fmt(liveReserveTotal);
+  document.getElementById('gfFootPO').textContent=fmt(livePoTotal);
+  document.getElementById('gfFootSpent').textContent=fmt(liveSpentTotal);
+  document.getElementById('gfFootLeft').textContent=fmt(liveLeftTotal);
+  document.getElementById('qGfmis').textContent=fmt(gfmisAccountBalance)+' บ.';
+  document.getElementById('qBudgetItems').textContent=gfmisData.length+' รายการ';
+}
+
+/* ============ render: gfmis (bank account ledger) ============ */
+function renderGfmisAcct(){
+  const filter=(document.getElementById('gfAcctFilter').value||'').toLowerCase();
+  let rows=[...gfmisAcctData];
+  if(filter) rows=rows.filter(r=>((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(filter));
+  document.getElementById('gfmisAcctTbody').innerHTML = rows.map(r=>`
+    <tr id="row-${(r.check||r.code||'').replace(/[^a-zA-Z0-9]/g,'')}">
+      <td>${thDate(r.date)}</td>
+      <td>${codeChip(r.code)}</td>
+      <td>${r.desc}</td>
+      <td>${r.check||'-'}</td>
+      <td class="num neg">${r.out? fmt(r.out):''}</td>
+      <td class="num pos">${r.in? fmt(r.in):''}</td>
+      <td class="num">${fmt(r.bal)}</td>
+    </tr>`).join('');
+  document.getElementById('gfAcctBal').textContent = fmt(gfmisAccountBalance)+' บาท';
+  document.getElementById('gfAcctCount').textContent = gfmisAcctData.length+' รายการ';
+}
+
+/* ============ dashboard visuals ============ */
+function renderDashboard(){
+  const totIn=depositData.reduce((s,r)=>s+r.in,0), totOut=depositData.reduce((s,r)=>s+r.out,0);
+  const depBal = depositOpening+totIn-totOut;
+  const heroTotal = depBal + bksLedgerBalance + gfmisAccountBalance;
+  document.getElementById('heroTotal').textContent = bahtOnly(heroTotal);
+
+  // donut: budget spent / committed(PO) / reserved / remaining — 4 slices summing to 100% of net budget
+  const pctSpent = (gfmisTotalSpent/gfmisTotalNet*100);
+  const pctPO = (gfmisTotalPO/gfmisTotalNet*100);
+  const pctReserve = (gfmisTotalReserve/gfmisTotalNet*100);
+  const donut = document.getElementById('donutBudget');
+  const s1 = pctSpent.toFixed(2), s2=(pctSpent+pctPO).toFixed(2), s3=(pctSpent+pctPO+pctReserve).toFixed(2);
+  donut.style.background = `conic-gradient(
+    var(--bad) 0% ${s1}%,
+    var(--fin) ${s1}% ${s2}%,
+    #7A4A00 ${s2}% ${s3}%,
+    var(--good) ${s3}% 100%)`;
+  document.getElementById('donutBudgetPct').textContent = pctSpent.toFixed(1)+'%';
+  document.getElementById('legendBudget').innerHTML = `
+    <div class="row"><span class="dot" style="background:var(--bad)"></span>เบิกจ่ายแล้ว ${fmt(gfmisTotalSpent)} บาท</div>
+    <div class="row"><span class="dot" style="background:var(--fin)"></span>ใบสั่งซื้อ/สัญญา ${fmt(gfmisTotalPO)} บาท</div>
+    <div class="row"><span class="dot" style="background:#7A4A00"></span>การสำรองเงิน ${fmt(gfmisTotalReserve)} บาท</div>
+    <div class="row"><span class="dot" style="background:var(--good)"></span>คงเหลือ ${fmt(gfmisTotalLeft)} บาท</div>
+  `;
+
+  // bar chart of account balances
+  const accounts=[
+    {name:'เงินรับฝาก-เงินประกัน',val:depBal,color:'var(--deposit)'},
+    {name:'เงินรายได้สถานศึกษา (บกศ.)',val:bksLedgerBalance,color:'var(--bks)'},
+    {name:'เงินงบประมาณ GFMIS',val:gfmisAccountBalance,color:'var(--gfmis)'},
+  ];
+  const max=Math.max(...accounts.map(a=>a.val));
+  document.getElementById('barAccounts').innerHTML = accounts.map(a=>`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px">
+        <span>${a.name}</span><b>${fmt(a.val)} บาท</b>
+      </div>
+      <div style="background:#F0EEE7;border-radius:8px;height:14px;overflow:hidden">
+        <div style="width:${(a.val/max*100).toFixed(1)}%;height:100%;background:${a.color};border-radius:8px"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderAll(){ renderDeposit(); renderBks(); renderGfmis(); renderGfmisAcct(); renderDashboard(); }
+
+/* ============ global search ============ */
+function doSearch(){
+  const q=(document.getElementById('globalSearch').value||'').trim().toLowerCase();
+  const box=document.getElementById('searchResults');
+  if(!q){ box.classList.remove('show'); return; }
+  let results=[];
+  depositData.forEach(r=>{ if((r.code+r.desc).toLowerCase().includes(q)) results.push({sec:'deposit',label:r.code||r.desc,sub:thDate(r.date)+' · '+r.desc,view:'deposit',idPart:(r.code||'').replace(/[^a-zA-Z0-9]/g,'')}); });
+  bksData.forEach(r=>{ if(((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(q)) results.push({sec:'bks',label:r.check||r.code||r.desc,sub:thDate(r.date)+' · '+r.desc,view:'bks',idPart:(r.check||r.code||'').replace(/[^a-zA-Z0-9]/g,'')}); });
+  gfmisData.forEach(r=>{ if((r.code+r.name).toLowerCase().includes(q)) results.push({sec:'budget',label:r.code,sub:r.name,view:'budget',idPart:r.code}); });
+  gfmisAcctData.forEach(r=>{ if(((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(q)) results.push({sec:'gfmisacct',label:r.check||r.code||r.desc,sub:thDate(r.date)+' · '+r.desc,view:'gfmis',idPart:(r.check||r.code||'').replace(/[^a-zA-Z0-9]/g,'')}); });
+
+  box.innerHTML = `<div class="sr-head"><b>ผลการค้นหา (${results.length})</b><span style="cursor:pointer" onclick="document.getElementById('searchResults').classList.remove('show')">✕</span></div>` +
+    (results.length? results.slice(0,40).map(r=>`
+      <div class="sr-item" onclick="jumpTo('${r.view}','${r.idPart}')">
+        <div class="c">${r.label}</div><div style="color:#777">${r.sub}</div>
+      </div>`).join('') : `<div class="none">ไม่พบรายการที่ตรงกับ "${q}"</div>`);
+  box.classList.add('show');
+}
+function jumpTo(view,idPart){
+  showView(view);
+  document.getElementById('searchResults').classList.remove('show');
+  setTimeout(()=>{
+    const row=[...document.querySelectorAll('tbody tr')].find(tr=>tr.id.includes(idPart));
+    if(row){ row.scrollIntoView({behavior:'smooth',block:'center'}); row.classList.add('flash'); setTimeout(()=>row.classList.remove('flash'),1800); }
+  },150);
+}
+
+/* ============ add-record modal ============ */
+let currentModalType=null;
+const fieldSets={
+  deposit:[
+    {k:'date',label:'วัน/เดือน/ปี',type:'date'},
+    {k:'desc',label:'รายการ',type:'text'},
+    {k:'in',label:'ยอดฝาก (บาท)',type:'number'},
+    {k:'out',label:'ยอดถอน (บาท)',type:'number'},
+    {k:'code',label:'เลขชุด/รหัส (เช่น R041, บฝ.032/69)',type:'text'},
+  ],
+  bks:[
+    {k:'date',label:'วันที่',type:'date'},
+    {k:'desc',label:'รายการ/คำอธิบาย',type:'text'},
+    {k:'check',label:'เลขที่เช็ค (ถ้ามี)',type:'text'},
+    {k:'out',label:'ถอน (บาท)',type:'number'},
+    {k:'in',label:'ฝาก (บาท)',type:'number'},
+    {k:'bal',label:'ยอดคงเหลือ',type:'number'},
+    {k:'code',label:'รหัสระบบ',type:'text'},
+    {k:'month',label:'เดือน (05/06/07/08)',type:'text'},
+  ],
+  gfmis:[
+    {k:'code',label:'รหัสงบประมาณ',type:'text'},
+    {k:'name',label:'ชื่อรายการ',type:'text'},
+    {k:'net',label:'งบสุทธิ',type:'number'},
+    {k:'reserve',label:'การสำรองเงิน',type:'number'},
+    {k:'po',label:'ใบสั่งซื้อ/สัญญา',type:'number'},
+    {k:'spent',label:'เบิกจ่าย',type:'number'},
+  ],
+  gfmisacct:[
+    {k:'date',label:'วันที่',type:'date'},
+    {k:'code',label:'รหัสธุรกรรมธนาคาร',type:'text'},
+    {k:'desc',label:'รายการ/คำอธิบาย',type:'text'},
+    {k:'check',label:'เลขที่เช็ค/อ้างอิง',type:'text'},
+    {k:'out',label:'ถอน (บาท)',type:'number'},
+    {k:'in',label:'ฝาก (บาท)',type:'number'},
+    {k:'bal',label:'ยอดคงเหลือ',type:'number'},
+  ],
+};
+const titles={deposit:'เพิ่มรายการ เงินรับฝากและเงินประกัน',bks:'เพิ่มรายการ เงินรายได้สถานศึกษา (บกศ.)',gfmis:'เพิ่มรายการงบประมาณตามรหัส',gfmisacct:'เพิ่มรายการเดินบัญชี GFMIS'};
+function openAdd(type){
+  currentModalType=type;
+  document.getElementById('modalTitle').textContent=titles[type];
+  document.getElementById('modalFields').innerHTML = fieldSets[type].map(f=>`
+    <div class="field"><label>${f.label}</label><input id="mf_${f.k}" type="${f.type}" step="0.01"></div>`).join('');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeAdd(){ document.getElementById('overlay').classList.remove('show'); }
+async function saveAdd(){
+  const type=currentModalType;
+  const obj={};
+  fieldSets[type].forEach(f=>{
+    const el=document.getElementById('mf_'+f.k);
+    obj[f.k] = f.type==='number' ? (parseFloat(el.value)||0) : el.value;
+  });
+  if(type==='gfmis'){ obj.spentKnown = true; obj.estimated = false; } // manually entered → treat spent value as confirmed
+  const map={deposit:{arr:depositData,key:'pam_deposit_extra'},bks:{arr:bksData,key:'pam_bks_extra'},gfmis:{arr:gfmisData,key:'pam_gfmis_extra'},gfmisacct:{arr:gfmisAcctData,key:'pam_gfmisacct_extra'}};
+  const {arr,key}=map[type];
+  arr.push(obj);
+  try{
+    const existing = await window.storage.get(key,false).catch(()=>null);
+    const list = existing && existing.value ? JSON.parse(existing.value) : [];
+    list.push(obj);
+    await window.storage.set(key, JSON.stringify(list), false);
+  }catch(e){ console.warn('บันทึกลง storage ไม่สำเร็จ',e); }
+  closeAdd();
+  renderAll();
+}
+
+initData();
+</script>
+</body>
+</html>
