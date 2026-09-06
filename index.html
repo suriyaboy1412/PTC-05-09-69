@@ -195,7 +195,7 @@
     <div>ระบบการเงิน-บัญชี<br><small>วิทยาลัยเทคนิคพนมสารคาม | ปีงบประมาณ 2569</small></div>
   </div>
   <div class="searchwrap">
-    <input id="globalSearch" placeholder="ค้นหารหัส เช่น บฝ.018, R022, บบ.001/69 ..." onkeydown="if(event.key==='Enter')doSearch()">
+    <input id="globalSearch" placeholder="ค้นหารหัส (บฝ.018, R022, บบ.001/69, Pay-005/69) หรือยอดเงิน (เช่น 14096) จากทุกบัญชี..." oninput="doSearch()" onkeydown="if(event.key==='Enter')doSearch()">
     <button onclick="doSearch()">🔎 ค้นหา</button>
   </div>
 </header>
@@ -1165,20 +1165,58 @@ function renderAll(){ renderDeposit(); renderBks(); renderGfmis(); renderGfmisAc
 
 /* ============ global search ============ */
 function doSearch(){
-  const q=(document.getElementById('globalSearch').value||'').trim().toLowerCase();
+  const qRaw=(document.getElementById('globalSearch').value||'').trim();
+  const q=qRaw.toLowerCase();
   const box=document.getElementById('searchResults');
   if(!q){ box.classList.remove('show'); return; }
+  const isAmountQuery = /^[\d,]+(\.\d+)?$/.test(qRaw);
+  const qNum = isAmountQuery ? parseFloat(qRaw.replace(/,/g,'')) : null;
+  const qDigits = qRaw.replace(/[.,]/g,'');
+  function amtHit(v){
+    if(!isAmountQuery || v==null || v===0) return false;
+    const s = Math.abs(v).toFixed(2).replace('.','');
+    return Math.abs(Math.abs(v)-qNum)<0.005 || s.includes(qDigits);
+  }
   let results=[];
-  depositData.forEach(r=>{ if((r.code+r.desc).toLowerCase().includes(q)) results.push({sec:'deposit',label:r.code||r.desc,sub:thDate(r.date)+' · '+r.desc,view:'deposit',idPart:(r.code||'').replace(/[^a-zA-Z0-9]/g,'')}); });
-  bksData.forEach(r=>{ if(((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(q)) results.push({sec:'bks',label:r.check||r.code||r.desc,sub:thDate(r.date)+' · '+r.desc,view:'bks',idPart:(r.check||r.code||'').replace(/[^a-zA-Z0-9]/g,'')}); });
-  gfmisData.forEach(r=>{ if((r.code+r.name).toLowerCase().includes(q)) results.push({sec:'budget',label:r.code,sub:r.name,view:'budget',idPart:r.code}); });
-  gfmisAcctData.forEach(r=>{ if(((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(q)) results.push({sec:'gfmisacct',label:r.check||r.code||r.desc,sub:thDate(r.date)+' · '+r.desc,view:'gfmis',idPart:(r.check||r.code||'').replace(/[^a-zA-Z0-9]/g,'')}); });
+  depositData.forEach(r=>{
+    const textHit=(r.code+r.desc).toLowerCase().includes(q);
+    const aHit = amtHit(r.in)||amtHit(r.out);
+    if(textHit||aHit){
+      const amtNote = aHit ? ` · ${r.in?('ฝาก '+fmt(r.in)):('ถอน '+fmt(r.out))} บาท` : '';
+      results.push({sec:'deposit',label:r.code||r.desc,sub:thDate(r.date)+' · '+r.desc+amtNote,view:'deposit',idPart:(r.code||'').replace(/[^a-zA-Z0-9]/g,'')});
+    }
+  });
+  bksData.forEach(r=>{
+    const textHit=((r.code||'')+(r.pamCode||'')+r.desc+(r.check||'')).toLowerCase().includes(q);
+    const aHit = amtHit(r.in)||amtHit(r.out)||amtHit(r.bal);
+    if(textHit||aHit){
+      const amtNote = aHit ? ` · ${r.in?('ฝาก '+fmt(r.in)):r.out?('ถอน '+fmt(r.out)):('คงเหลือ '+fmt(r.bal))} บาท` : '';
+      results.push({sec:'bks',label:r.pamCode||r.check||r.code||r.desc,sub:thDate(r.date)+' · '+r.desc+amtNote,view:'bks',idPart:(r.pamCode||r.check||r.code||'').replace(/[^a-zA-Z0-9ก-๙]/g,'')});
+    }
+  });
+  gfmisData.forEach(r=>{
+    const textHit=(r.code+r.name).toLowerCase().includes(q);
+    const left=r.net-r.reserve-r.po-r.spent;
+    const aHit = amtHit(r.net)||amtHit(r.reserve)||amtHit(r.po)||amtHit(r.spent)||amtHit(left);
+    if(textHit||aHit){
+      const amtNote = aHit ? ` · งบสุทธิ ${fmt(r.net)} / เบิกจ่าย ${fmt(r.spent)} / คงเหลือ ${fmt(left)} บาท` : '';
+      results.push({sec:'budget',label:r.code,sub:r.name+amtNote,view:'budget',idPart:r.code});
+    }
+  });
+  gfmisAcctData.forEach(r=>{
+    const textHit=((r.code||'')+(r.pamCode||'')+r.desc+(r.check||'')).toLowerCase().includes(q);
+    const aHit = amtHit(r.in)||amtHit(r.out)||amtHit(r.bal);
+    if(textHit||aHit){
+      const amtNote = aHit ? ` · ${r.in?('ฝาก '+fmt(r.in)):r.out?('ถอน '+fmt(r.out)):('คงเหลือ '+fmt(r.bal))} บาท` : '';
+      results.push({sec:'gfmisacct',label:r.pamCode||r.check||r.code||r.desc,sub:thDate(r.date)+' · '+r.desc+amtNote,view:'gfmis',idPart:(r.pamCode||r.check||r.code||'').replace(/[^a-zA-Z0-9ก-๙]/g,'')});
+    }
+  });
 
   box.innerHTML = `<div class="sr-head"><b>ผลการค้นหา (${results.length})</b><span style="cursor:pointer" onclick="document.getElementById('searchResults').classList.remove('show')">✕</span></div>` +
     (results.length? results.slice(0,40).map(r=>`
       <div class="sr-item" onclick="jumpTo('${r.view}','${r.idPart}')">
         <div class="c">${r.label}</div><div style="color:#777">${r.sub}</div>
-      </div>`).join('') : `<div class="none">ไม่พบรายการที่ตรงกับ "${q}"</div>`);
+      </div>`).join('') : `<div class="none">ไม่พบรายการที่ตรงกับ "${qRaw}"</div>`);
   box.classList.add('show');
 }
 function jumpTo(view,idPart){
