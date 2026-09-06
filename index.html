@@ -183,6 +183,9 @@
 
   footer{text-align:center;padding:26px;color:#8a8578;font-size:.78rem;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -281,7 +284,10 @@
         <h2>💰 เงินรับฝากและเงินประกัน</h2>
         <div class="desc">รหัสฝาก R xxx (เรียงวันที่น้อย→มาก) · รหัสถอน บฝ.xxx (เรียงวันที่น้อย→มาก) · บัญชี 203-6-02342-8</div>
       </div>
-      <button class="btn" style="background:#fff;color:var(--deposit)" onclick="openAdd('deposit')">＋ อัปเดทข้อมูล</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" style="background:#fff;color:var(--deposit)" onclick="openAdd('deposit')">＋ อัปเดทข้อมูล</button>
+        <button class="btn" style="background:#124a43;color:#fff" onclick="openBulk('deposit')">📊 อัปเดท Statement</button>
+      </div>
     </div>
 
     <div class="summary3">
@@ -313,7 +319,10 @@
         <h2>🏦 เงินรายได้สถานศึกษา (บกศ.)</h2>
         <div class="desc">ฝากผ่านเช็ก → R xxx · ฝากไม่ผ่านเช็ก → Pay-xxx · ถอน → บบ.xxx / บย.xxx · บัญชี 203-6-02134-4</div>
       </div>
-      <button class="btn" style="background:#fff;color:var(--bks)" onclick="openAdd('bks')">＋ อัปเดทข้อมูล</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" style="background:#fff;color:var(--bks)" onclick="openAdd('bks')">＋ อัปเดทข้อมูล</button>
+        <button class="btn" style="background:#3f2178;color:#fff" onclick="openBulk('bks')">📊 อัปเดท Statement</button>
+      </div>
     </div>
 
     <div class="summary3">
@@ -340,7 +349,7 @@
         <tbody id="bksTbody"></tbody>
       </table>
     </div>
-    <p style="font-size:.78rem;color:#888;margin-top:10px">* ทุกรายการถอดจาก Statement ธนาคารกรุงไทย บัญชี 203-6-02134-4 เดือน พ.ค.–ก.ย. 2569 (ถึง 4 ก.ย.) ครบ 257 รายการ — ยอดฝากรวม/ถอนรวมของแต่ละช่วงตรวจสอบแล้วตรงกับยอดควบคุมท้ายใบ Statement ทุกฉบับ (100%) ยอดคงเหลือล่าสุด 1,752,107.86 บาท ตรงกับ Ledger Balance ของธนาคาร ณ 4 ก.ย. 2569 — กดปุ่ม "อัปเดทข้อมูล" เพื่อเพิ่มเมื่อได้รับเอกสารรอบถัดไป</p>
+    <p style="font-size:.78rem;color:#888;margin-top:10px">* ทุกรายการถอดจาก Statement ธนาคารกรุงไทย บัญชี 203-6-02134-4 เดือน พ.ค.–ก.ย. 2569 (ถึง 4 ก.ย.) ครบ 257 รายการ — ยอดฝากรวม/ถอนรวมของแต่ละช่วงตรวจสอบแล้วตรงกับยอดควบคุมท้ายใบ Statement ทุกฉบับ (100%) ยอดคงเหลือล่าสุด 1,752,107.86 บาท ตรงกับ Ledger Balance ของธนาคาร ณ 4 ก.ย. 2569 — กดปุ่ม "＋ อัปเดทข้อมูล" เพิ่มทีละรายการ หรือ "📊 อัปเดท Statement" เพื่อวางข้อมูลหลายรายการพร้อมกัน (ตารางจะเรียงตามวันที่และคำนวณยอดคงเหลือให้อัตโนมัติ)</p>
   </section>
 
   <!-- ================= BUDGET CODE TABLE (separate from bank account) ================= -->
@@ -350,7 +359,10 @@
         <h2>📑 งบประมาณตามรหัส GFMIS</h2>
         <div class="desc">รายงานสถานะการเบิกจ่ายงบประมาณตามค่ารหัสงบประมาณ NFMA46 · ปีงบประมาณ 2569 (แยกจากบัญชีเงินงบประมาณธนาคาร)</div>
       </div>
-      <button class="btn" style="background:#fff;color:var(--plan)" onclick="openAdd('gfmis')">＋ อัปเดทข้อมูล</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" style="background:#fff;color:var(--plan)" onclick="openAdd('gfmis')">＋ อัปเดทข้อมูล</button>
+        <button class="btn" style="background:#5c3d20;color:#fff" onclick="openBulk('gfmisBulk')">📊 นำเข้าไฟล์ (PDF/Excel/รูปภาพ)</button>
+      </div>
     </div>
 
     <div class="summary3" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
@@ -389,7 +401,10 @@
         <h2>🏛️ บัญชีเงินงบประมาณ (ธนาคาร)</h2>
         <div class="desc">บัญชีกระแสรายวัน 203-6-02133-6 · การเดินบัญชีจริงกับธนาคารกรุงไทย (แยกจากตารางงบประมาณตามรหัส)</div>
       </div>
-      <button class="btn" style="background:#fff;color:var(--gfmis)" onclick="openAdd('gfmisacct')">＋ อัปเดทข้อมูล</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" style="background:#fff;color:var(--gfmis)" onclick="openAdd('gfmisacct')">＋ อัปเดทข้อมูล</button>
+        <button class="btn" style="background:#173d99;color:#fff" onclick="openBulk('gfmisacct')">📊 อัปเดท Statement</button>
+      </div>
     </div>
 
     <div class="summary3">
@@ -423,6 +438,29 @@
     <div class="modalbtns">
       <button class="btn ghost" onclick="closeAdd()">ยกเลิก</button>
       <button class="btn" id="modalSaveBtn" style="background:var(--fin)" onclick="saveAdd()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Bulk Statement import modal ===== -->
+<div class="overlay" id="bulkOverlay">
+  <div class="modal" style="max-width:640px">
+    <h3 id="bulkModalTitle">นำเข้า Statement หลายรายการ</h3>
+    <p id="bulkFormatHint" style="font-size:.82rem;color:#666;background:#F5F3EC;padding:10px 12px;border-radius:10px;line-height:1.6"></p>
+    <div class="field" style="background:#EEF6FF;border:1px dashed #9DBEE8;border-radius:12px;padding:12px">
+      <label>📄 หรืออัปโหลดไฟล์ PDF / Excel / รูปภาพ Statement ให้ระบบอ่านและกรอกให้อัตโนมัติ</label>
+      <input type="file" id="bulkPdfFile" accept=".pdf,.xlsx,.xls,.csv,image/*" onchange="handleBulkFileUpload(event)" style="width:100%">
+      <div id="bulkPdfStatus" style="font-size:.8rem;color:#666;margin-top:6px"></div>
+    </div>
+    <div class="field">
+      <label>วางรายการ (บรรทัดละ 1 รายการ)</label>
+      <textarea id="bulkText" rows="10" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-family:'Prompt',monospace;font-size:.85rem" placeholder=""></textarea>
+    </div>
+    <div id="bulkPreview" style="font-size:.8rem;color:#555;margin-top:8px"></div>
+    <div class="modalbtns">
+      <button class="btn ghost" onclick="closeBulk()">ยกเลิก</button>
+      <button class="btn" style="background:var(--fin)" onclick="previewBulk()">ตรวจสอบก่อนบันทึก</button>
+      <button class="btn" id="bulkSaveBtn" style="background:var(--good);display:none" onclick="saveBulk()">ยืนยันบันทึกทั้งหมด</button>
     </div>
   </div>
 </div>
@@ -970,9 +1008,10 @@ function showView(id, el){
 function renderDeposit(){
   const filter=(document.getElementById('depFilter').value||'').toLowerCase();
   const sortDir=document.getElementById('depSort').value;
+  depositData.sort((a,b)=>a.date.localeCompare(b.date)); // เก็บข้อมูลจริงเรียงตามวันที่ก่อนหลังเสมอ
   let rows=[...depositData];
   if(filter) rows=rows.filter(r=>(r.code+r.desc).toLowerCase().includes(filter));
-  rows.sort((a,b)=> sortDir==='asc' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date));
+  if(sortDir==='desc') rows.reverse();
   document.getElementById('depositTbody').innerHTML = rows.map(r=>`
     <tr id="row-${r.code.replace(/[^a-zA-Z0-9]/g,'')}">
       <td>${thDate(r.date)}</td><td>${r.desc}</td>
@@ -998,6 +1037,7 @@ function thDate(iso){
 function renderBks(){
   const filter=(document.getElementById('bksFilter').value||'').toLowerCase();
   const month=document.getElementById('bksMonth').value;
+  bksData.sort((a,b)=>a.date.localeCompare(b.date)); // เรียงตามวันที่ก่อนหลังเสมอ
   let rows=[...bksData];
   if(filter) rows=rows.filter(r=>((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(filter));
   if(month) rows=rows.filter(r=>r.month===month);
@@ -1057,6 +1097,7 @@ function renderGfmis(){
 /* ============ render: gfmis (bank account ledger) ============ */
 function renderGfmisAcct(){
   const filter=(document.getElementById('gfAcctFilter').value||'').toLowerCase();
+  gfmisAcctData.sort((a,b)=>a.date.localeCompare(b.date)); // เรียงตามวันที่ก่อนหลังเสมอ
   let rows=[...gfmisAcctData];
   if(filter) rows=rows.filter(r=>((r.code||'')+r.desc+(r.check||'')).toLowerCase().includes(filter));
   document.getElementById('gfmisAcctTbody').innerHTML = rows.map(r=>`
@@ -1211,6 +1252,346 @@ async function saveAdd(){
     await window.storage.set(key, JSON.stringify(list), false);
   }catch(e){ console.warn('บันทึกลง storage ไม่สำเร็จ',e); }
   closeAdd();
+  renderAll();
+}
+
+/* ============ PDF Statement auto-read (best-effort, uses pdf.js) ============ */
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+async function extractLinesFromPDF(arrayBuffer){
+  const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+  const allLines = [];
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const items = content.items.filter(it=>it.str && it.str.trim());
+    const sorted = items.slice().sort((a,b)=> b.transform[5]-a.transform[5]);
+    const groups = [];
+    let current = null;
+    sorted.forEach(item=>{
+      const y = item.transform[5];
+      if(current && Math.abs(current.y-y)<=3){ current.items.push(item); }
+      else { current={y,items:[item]}; groups.push(current); }
+    });
+    groups.forEach(g=>{
+      const line = g.items.slice().sort((a,b)=>a.transform[4]-b.transform[4]).map(it=>it.str).join(' ').replace(/\s+/g,' ').trim();
+      if(line) allLines.push(line);
+    });
+  }
+  return allLines;
+}
+const pdfCodeLabels = {
+  CWTRC:'ถอนเช็ค', CDTRC:'ฝากเช็ค', CDCH:'ฝากเงินสด', CWCH:'ถอนเช็ค', CWTPC:'ถอนเช็ค',
+  CBCA:'ถอนอัตโนมัติ', BCD14:'รับโอน GFMIS/กรมบัญชีกลาง', BCD02:'รับโอน สอศ.',
+  BPDWT:'โอนเงินออก', IORDDT:'โอนเข้าบัญชี', ATDDC:'ฝากผ่าน ATM',
+};
+function extractTransactionsFromLines(lines){
+  const codeRe = /\b(CWTRC|CDTRC|CDCH|CWCH|CBCA|CWTPC|BCD14|BCD02|BPDWT|IORDDT|ATDDC)\b/;
+  const dateRe = /(\d{1,2}\/\d{1,2}\/\d{4})|(\d{2}-\d{2}-\d{4})/;
+  const moneyRe = /-?\d{1,3}(?:,\d{3})*\.\d{2}/g;
+  function toISO(dateStr){
+    let m=dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m) return `${(+m[3])-543}-${pad2(+m[2])}-${pad2(+m[1])}`; // D/M/พ.ศ. (ปฏิทินไทยบนใบ Statement)
+    m=dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if(m) return `${+m[3]}-${pad2(+m[2])}-${pad2(+m[1])}`; // DD-MM-YYYY (ค.ศ. จากระบบออนไลน์)
+    return null;
+  }
+  let prevBal=null, lastDate=null;
+  const rows=[];
+  for(const raw of lines){
+    const line=raw.trim();
+    if(!line) continue;
+    const isOpening = /ยอดยกมา|B\s*\/\s*F/i.test(line);
+    const dm=line.match(dateRe);
+    const moneyMatches=line.match(moneyRe);
+    if(!moneyMatches) continue;
+    const balance=parseFloat(moneyMatches[moneyMatches.length-1].replace(/,/g,''));
+    let dateISO = dm ? toISO(dm[0]) : lastDate;
+    if(dm && dateISO) lastDate=dateISO;
+    if(isOpening){ prevBal=balance; continue; }
+    if(!dateISO) continue;
+    if(prevBal===null){ prevBal=balance; continue; }
+    const delta=Math.round((balance-prevBal)*100)/100;
+    prevBal=balance;
+    if(delta===0) continue;
+    const codeM=line.match(codeRe);
+    const code=codeM?codeM[1]:null;
+    const desc = code ? pdfCodeLabels[code] : (delta>0?'ฝากเงิน':'ถอนเงิน');
+    const stripped=line.replace(moneyRe,' ');
+    const chqMatches=stripped.match(/\b\d{6,10}\b/g);
+    const cheque = chqMatches ? chqMatches[chqMatches.length-1] : '';
+    rows.push({date:dateISO, desc, cheque, in: delta>0?delta:0, out: delta<0?-delta:0});
+  }
+  return rows;
+}
+function rowsToCsv(rows, type){
+  return rows.map(r=>{
+    if(type==='deposit') return `${r.date},${r.desc},${r.in||0},${r.out||0},`;
+    return `${r.date},${r.desc},${r.cheque||''},${r.out||0},${r.in||0}`;
+  }).join('\n');
+}
+/* ---- Excel (.xlsx/.xls/.csv) → line array (reuses the same regex-based extractor) ---- */
+async function extractLinesFromExcel(file){
+  if(file.name.toLowerCase().endsWith('.csv')){
+    const text = await file.text();
+    return text.split('\n');
+  }
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, {type:'array'});
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, {header:1, raw:false, defval:''});
+  return rows.map(r => r.join(' '));
+}
+/* ---- Image → OCR text → line array (uses Tesseract.js, Thai+English) ---- */
+async function extractLinesFromImage(file, statusEl){
+  if(!window.Tesseract){ throw new Error('ไลบรารีอ่านรูปภาพ (OCR) โหลดไม่สำเร็จ'); }
+  const { data: { text } } = await Tesseract.recognize(file, 'tha+eng', {
+    logger: m=>{ if(m.status && m.progress!=null && statusEl) statusEl.textContent = `⏳ กำลังอ่านรูปภาพด้วย OCR: ${m.status} (${Math.round(m.progress*100)}%)`; }
+  });
+  return text.split('\n');
+}
+function detectFileKind(file){
+  const name = file.name.toLowerCase();
+  if(name.endsWith('.pdf')) return 'pdf';
+  if(name.endsWith('.xlsx')||name.endsWith('.xls')||name.endsWith('.csv')) return 'excel';
+  if(file.type.startsWith('image/')) return 'image';
+  return 'unknown';
+}
+/* ---- Generic dispatcher used by the 3 bank-statement bulk-import buttons ---- */
+/* ---- Budget-code (NFMA46) extraction — used only by the GFMIS "นำเข้าไฟล์" button ---- */
+function mergeWrappedCodeLines(lines){
+  // รหัสงบประมาณยาว 18-20 หลัก บางครั้งถูกตัดขึ้นบรรทัดใหม่ในไฟล์ต้นฉบับ (เช่น PDF ตาราง) — รวมเฉพาะบรรทัดที่เป็นตัวเลขล้วนติดกันเข้าด้วยกัน
+  const merged=[];
+  for(const raw of lines){
+    const line=(raw||'').trim();
+    const prev = merged.length ? merged[merged.length-1] : undefined;
+    if(/^\d{3,14}$/.test(line) && prev!==undefined && /^\d{3,14}$/.test(prev)){
+      merged[merged.length-1] = prev + line;
+    } else {
+      merged.push(line);
+    }
+  }
+  return merged;
+}
+function extractBudgetRowsFromLines(lines){
+  const merged = mergeWrappedCodeLines(lines);
+  const codeRe = /\b(\d{18,20})\b/;
+  const moneyRe = /-?\d{1,3}(?:,\d{3})*\.\d{1,2}/g;
+  const rows=[];
+  let buffer=[];
+  merged.forEach(raw=>{
+    const line=(raw||'').trim();
+    if(!line) return;
+    buffer.push(line);
+    const codeM=line.match(codeRe);
+    if(codeM){
+      // รหัสงบประมาณ (18-20 หลัก) มักอยู่ท้ายสุดของแต่ละรายการในรายงาน NFMA46
+      // จึงรวมข้อความที่สะสมไว้ทั้งหมดตั้งแต่รายการก่อนหน้า มาเป็น "1 บล็อก" ของรายการนี้
+      const blockText = buffer.join(' ');
+      const moneyMatches = blockText.match(moneyRe);
+      if(moneyMatches && moneyMatches.length>=3){
+        const vals = moneyMatches.map(m=>parseFloat(m.replace(/,/g,'')));
+        let name = blockText.replace(codeRe,' ').replace(moneyRe,' ').replace(/\*/g,' ').replace(/\b2569\b/g,' ').replace(/\s+/g,' ').trim();
+        rows.push({ code:codeM[1], name: name||'(ไม่พบชื่อรายการ)', net:vals[0]||0, reserve:vals[1]||0, po:vals[2]||0, spent:vals[3]||0 });
+      }
+      buffer=[];
+    }
+  });
+  return rows;
+}
+function budgetRowsToCsv(rows){
+  return rows.map(r=>`${r.code},${r.name},${r.net},${r.reserve},${r.po},${r.spent}`).join('\n');
+}
+
+async function handleBulkFileUpload(evt){
+  const file=evt.target.files[0];
+  const statusEl=document.getElementById('bulkPdfStatus');
+  if(!file) return;
+  const kind = detectFileKind(file);
+  if(kind==='unknown'){ statusEl.innerHTML='<span style="color:var(--bad)">ไม่รู้จักชนิดไฟล์นี้ — รองรับเฉพาะ PDF, Excel (.xlsx/.xls/.csv) และรูปภาพ (.jpg/.png)</span>'; return; }
+  statusEl.textContent = kind==='image' ? '⏳ กำลังเตรียมอ่านรูปภาพ (อาจใช้เวลาสักครู่)...' : '⏳ กำลังอ่านไฟล์...';
+  try{
+    let lines;
+    if(kind==='pdf'){
+      if(!window.pdfjsLib) throw new Error('ไลบรารีอ่าน PDF โหลดไม่สำเร็จ');
+      lines = await extractLinesFromPDF(await file.arrayBuffer());
+    } else if(kind==='excel'){
+      if(!window.XLSX && !file.name.toLowerCase().endsWith('.csv')) throw new Error('ไลบรารีอ่าน Excel โหลดไม่สำเร็จ');
+      lines = await extractLinesFromExcel(file);
+    } else {
+      lines = await extractLinesFromImage(file, statusEl);
+    }
+    if(!lines || !lines.filter(l=>l.trim()).length){
+      statusEl.innerHTML='<span style="color:var(--bad)">อ่านไฟล์ไม่พบข้อความเลย — ถ้าเป็นไฟล์สแกน/ภาพถ่ายที่เบลอมาก ระบบ OCR อาจอ่านไม่ออก กรุณาพิมพ์/วางข้อมูลด้วยตนเองแทน</span>';
+      return;
+    }
+    if(currentBulkType==='gfmisBulk'){
+      const rows = extractBudgetRowsFromLines(lines);
+      if(!rows.length){
+        statusEl.innerHTML=`<span style="color:#B08A00">อ่านไฟล์ได้ ${lines.length} บรรทัด แต่ไม่พบรูปแบบรหัสงบประมาณที่รู้จัก — ไฟล์ Excel ที่ Export จากระบบมักอ่านได้แม่นยำสุด กรุณาลองไฟล์ Excel หรือพิมพ์/วางข้อมูลด้วยตนเองแทน</span>`;
+        return;
+      }
+      document.getElementById('bulkText').value = budgetRowsToCsv(rows);
+      statusEl.innerHTML = `<span style="color:var(--good)">✓ อ่านไฟล์สำเร็จ (${kind==='pdf'?'PDF':kind==='excel'?'Excel':'รูปภาพ/OCR'}) พบ ${rows.length} รหัสงบประมาณ (กรุณาตรวจทานชื่อรายการและตัวเลขในกล่องข้อความก่อนบันทึก)</span>`;
+      previewBulk();
+      return;
+    }
+    const rows = extractTransactionsFromLines(lines);
+    if(!rows.length){
+      statusEl.innerHTML=`<span style="color:#B08A00">อ่านไฟล์ได้ ${lines.length} บรรทัด แต่ไม่พบรูปแบบรายการธุรกรรมที่รู้จัก — กรุณาตรวจสอบเนื้อหาไฟล์ หรือพิมพ์/วางข้อมูลด้วยตนเองแทน</span>`;
+      return;
+    }
+    document.getElementById('bulkText').value = rowsToCsv(rows, currentBulkType);
+    statusEl.innerHTML = `<span style="color:var(--good)">✓ อ่านไฟล์สำเร็จ (${kind==='pdf'?'PDF':kind==='excel'?'Excel':'รูปภาพ/OCR'}) พบ ${rows.length} รายการ (กรุณาตรวจทานความถูกต้องในกล่องข้อความก่อนกดตรวจสอบ/บันทึก — คำอธิบายและเลขที่เช็คบางรายการอาจต้องแก้ไขเอง)</span>`;
+    previewBulk();
+  }catch(err){
+    console.error(err);
+    statusEl.innerHTML = `<span style="color:var(--bad)">เกิดข้อผิดพลาดขณะอ่านไฟล์: ${err.message||err}</span>`;
+  }
+}
+
+/* ============ Bulk Statement import (multi-line paste) ============ */
+function pad2(n){ return String(n).padStart(2,'0'); }
+function parseFlexDate(s){
+  s=(s||'').trim();
+  if(!s) return null;
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m) return `${m[1]}-${pad2(m[2])}-${pad2(m[3])}`;
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(m){
+    const d=parseInt(m[1]), mo=parseInt(m[2]); let y=parseInt(m[3]); let gYear;
+    if(m[3].length<=2) gYear = 2500+y-543;      // เช่น 69 -> 2569 พ.ศ. -> 2026 ค.ศ.
+    else if(y>2400) gYear = y-543;               // เช่น 2569 พ.ศ. (4 หลัก) -> 2026 ค.ศ.
+    else gYear = y;                               // เป็น ค.ศ. อยู่แล้ว เช่น 2026
+    return `${gYear}-${pad2(mo)}-${pad2(d)}`;
+  }
+  return null;
+}
+let currentBulkType=null, bulkParsedRows=null;
+const bulkHints = {
+  deposit: '📄 อัปโหลดไฟล์ PDF / Excel / รูปภาพ Statement ด้านล่างให้ระบบอ่านอัตโนมัติ หรือพิมพ์/วางเอง — รูปแบบ: <b>วันที่,รายการ,ฝาก,ถอน,รหัส</b> (คั่นด้วยจุลภาค , หรือ Tab จากการวางจาก Excel — บรรทัดละ 1 รายการ)<br>ตัวอย่าง: <code>5/4/69,รับฝากค่าเช่า,7000,0,</code><br><code>5/4/69,ถอนเบิกจ่าย,0,5000,บฝ.099/69</code><br>วันที่ใช้รูปแบบ วัน/เดือน/ปี(2 หลัก พ.ศ.) เช่น 5/4/69 = 5 เม.ย. 2569 (หรือจะพิมพ์ 5/4/2569 ก็ได้)',
+  bks: '📄 อัปโหลดไฟล์ PDF / Excel / รูปภาพ Statement ด้านล่างให้ระบบอ่านอัตโนมัติ หรือพิมพ์/วางเอง — รูปแบบ: <b>วันที่,รายการ,เลขที่เช็ค,ถอน,ฝาก</b> (คั่นด้วยจุลภาค , หรือ Tab — บรรทัดละ 1 รายการ <u>ไม่ต้องกรอกยอดคงเหลือ</u> ระบบคำนวณสะสมให้อัตโนมัติตามลำดับวันที่)<br>ตัวอย่าง: <code>5/4/69,ถอนเช็ค,10299999,5000,0</code><br><code>5/4/69,ฝากเงินสด,,0,12000</code>',
+  gfmisacct: '📄 อัปโหลดไฟล์ PDF / Excel / รูปภาพ Statement ด้านล่างให้ระบบอ่านอัตโนมัติ หรือพิมพ์/วางเอง — รูปแบบ: <b>วันที่,รายการ,เลขที่เช็ค,ถอน,ฝาก</b> (คั่นด้วยจุลภาค , หรือ Tab — บรรทัดละ 1 รายการ <u>ไม่ต้องกรอกยอดคงเหลือ</u> ระบบคำนวณสะสมให้อัตโนมัติตามลำดับวันที่)<br>ตัวอย่าง: <code>5/4/69,รับโอน GFMIS,,0,50000</code>',
+  gfmisBulk: '📄 อัปโหลดไฟล์ PDF / Excel / รูปภาพ ของรายงานงบประมาณตามรหัส (NFMA46) — <u>ไฟล์ Excel ให้ผลแม่นยำที่สุด</u> — หรือพิมพ์/วางเอง รูปแบบ: <b>รหัสงบประมาณ,ชื่อรายการ,งบสุทธิ,การสำรองเงิน,ใบสั่งซื้อ,เบิกจ่าย</b> (คั่นด้วยจุลภาค , หรือ Tab — บรรทัดละ 1 รหัส งบคงเหลือคำนวณให้อัตโนมัติ)<br>ตัวอย่าง: <code>20006060013005000002,ค่าใช้จ่ายโครงการอาชีวะต้านยาเสพติด,20000,0,0,8380</code><br>รหัสที่มีอยู่แล้วในตารางจะถูก<b>อัปเดตทับ</b>ด้วยค่าใหม่ ส่วนรหัสใหม่จะถูกเพิ่มเข้าไปและเรียงลำดับรหัสจากน้อยไปมาก',
+};
+const bulkTitles = {deposit:'📊 นำเข้า Statement เงินรับฝากและเงินประกัน (หลายรายการ)', bks:'📊 นำเข้า Statement เงินรายได้สถานศึกษา (บกศ.)', gfmisacct:'📊 นำเข้า Statement บัญชีเงินงบประมาณ', gfmisBulk:'📊 นำเข้าไฟล์ งบประมาณตามรหัส GFMIS (หลายรายการ)'};
+function getBulkArr(type){ return type==='deposit'?depositData:(type==='bks'?bksData:(type==='gfmisacct'?gfmisAcctData:gfmisData)); }
+function openBulk(type){
+  currentBulkType=type; bulkParsedRows=null;
+  document.getElementById('bulkModalTitle').textContent=bulkTitles[type];
+  document.getElementById('bulkFormatHint').innerHTML=bulkHints[type];
+  document.getElementById('bulkText').value='';
+  document.getElementById('bulkPreview').innerHTML='';
+  document.getElementById('bulkPdfFile').value='';
+  document.getElementById('bulkPdfStatus').innerHTML='';
+  document.getElementById('bulkSaveBtn').style.display='none';
+  document.getElementById('bulkOverlay').classList.add('show');
+}
+function closeBulk(){ document.getElementById('bulkOverlay').classList.remove('show'); }
+function previewBulk(){
+  const type=currentBulkType;
+  const lines=document.getElementById('bulkText').value.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  const errors=[]; const parsed=[];
+  const box=document.getElementById('bulkPreview');
+  if(lines.length===0){
+    box.innerHTML='<span style="color:var(--bad)">กรุณาวางข้อมูลอย่างน้อย 1 บรรทัด</span>';
+    document.getElementById('bulkSaveBtn').style.display='none';
+    return;
+  }
+  if(type==='gfmisBulk'){
+    lines.forEach((line,i)=>{
+      const sep = line.includes('\t') ? '\t' : ',';
+      const parts = line.split(sep).map(p=>p.trim());
+      const [code,name,netStr,reserveStr,poStr,spentStr] = parts;
+      if(!code || !/^\d{10,20}$/.test(code)){ errors.push(`บรรทัด ${i+1}: รหัสงบประมาณไม่ถูกต้อง "${code||''}"`); return; }
+      parsed.push({code, name:name||'', net:parseFloat(netStr)||0, reserve:parseFloat(reserveStr)||0, po:parseFloat(poStr)||0, spentKnown:true, estimated:false, spent:parseFloat(spentStr)||0});
+    });
+    bulkParsedRows=parsed;
+    const totNet=parsed.reduce((s,r)=>s+r.net,0), totSpent=parsed.reduce((s,r)=>s+r.spent,0);
+    const existing=gfmisData.filter(r=>parsed.some(p=>p.code===r.code)).length;
+    let html = `พบ <b>${parsed.length}</b> รหัสงบประมาณที่อ่านได้ถูกต้อง จากทั้งหมด ${lines.length} บรรทัด (จะอัปเดตทับ ${existing} รหัสเดิม และเพิ่มใหม่ ${parsed.length-existing} รหัส)`;
+    html += `<br>งบสุทธิรวมที่นำเข้า: <b>${fmt(totNet)}</b> บาท / เบิกจ่ายรวมที่นำเข้า: <b style="color:var(--bad)">${fmt(totSpent)}</b> บาท`;
+    if(errors.length){ html += `<br><span style="color:var(--bad)">ข้ามบรรทัดที่ผิดพลาด ${errors.length} รายการ:</span><ul style="margin:4px 0 0 18px">${errors.map(e=>`<li>${e}</li>`).join('')}</ul>`; }
+    box.innerHTML=html;
+    document.getElementById('bulkSaveBtn').style.display = parsed.length? 'inline-block':'none';
+    return;
+  }
+  lines.forEach((line,i)=>{
+    const sep = line.includes('\t') ? '\t' : ',';
+    const parts = line.split(sep).map(p=>p.trim());
+    if(type==='deposit'){
+      const [dateStr,desc,inStr,outStr,code] = parts;
+      const iso=parseFlexDate(dateStr);
+      if(!iso){ errors.push(`บรรทัด ${i+1}: วันที่อ่านไม่ได้ "${dateStr||''}"`); return; }
+      parsed.push({date:iso, desc:desc||'', in:parseFloat(inStr)||0, out:parseFloat(outStr)||0, code:code||''});
+    } else {
+      const [dateStr,desc,check,outStr,inStr] = parts;
+      const iso=parseFlexDate(dateStr);
+      if(!iso){ errors.push(`บรรทัด ${i+1}: วันที่อ่านไม่ได้ "${dateStr||''}"`); return; }
+      const month = iso.split('-')[1];
+      parsed.push({date:iso, desc:desc||'', check:check||'', out:parseFloat(outStr)||0, in:parseFloat(inStr)||0, code:'', bal:0, month});
+    }
+  });
+  bulkParsedRows=parsed;
+  const totIn=parsed.reduce((s,r)=>s+(r.in||0),0);
+  const totOut=parsed.reduce((s,r)=>s+(r.out||0),0);
+  let html = `พบ <b>${parsed.length}</b> รายการที่อ่านได้ถูกต้อง จากทั้งหมด ${lines.length} บรรทัด`;
+  html += `<br>ยอดฝากรวมที่จะเพิ่ม: <b style="color:var(--good)">${fmt(totIn)}</b> บาท / ยอดถอนรวมที่จะเพิ่ม: <b style="color:var(--bad)">${fmt(totOut)}</b> บาท`;
+  html += `<br><b>สุทธิที่จะเปลี่ยนแปลง: ${fmt(totIn-totOut)} บาท</b>`;
+  if(type!=='deposit' && parsed.length){
+    const arr=getBulkArr(type);
+    if(arr.length){
+      const minExisting = arr.reduce((m,r)=>r.date<m?r.date:m, arr[0].date);
+      const minNew = parsed.reduce((m,r)=>r.date<m?r.date:m, parsed[0].date);
+      if(minNew < minExisting){
+        html += `<br><span style="color:#B08A00">⚠ พบวันที่ (${thDate(minNew)}) ก่อนข้อมูลเก่าสุดที่มีอยู่ (${thDate(minExisting)}) — ยอดคงเหลือสะสมที่คำนวณให้อาจคลาดเคลื่อน ควรตรวจทานยอดยกมาอีกครั้งหลังบันทึก</span>`;
+      }
+    }
+  }
+  if(errors.length){
+    html += `<br><span style="color:var(--bad)">ข้ามบรรทัดที่ผิดพลาด ${errors.length} รายการ (จะไม่ถูกบันทึก):</span><ul style="margin:4px 0 0 18px">${errors.map(e=>`<li>${e}</li>`).join('')}</ul>`;
+  }
+  box.innerHTML=html;
+  document.getElementById('bulkSaveBtn').style.display = parsed.length? 'inline-block':'none';
+}
+async function saveBulk(){
+  const type=currentBulkType;
+  if(!bulkParsedRows || !bulkParsedRows.length) return;
+  if(type==='gfmisBulk'){
+    bulkParsedRows.forEach(newRow=>{
+      const idx = gfmisData.findIndex(r=>r.code===newRow.code);
+      if(idx>=0) gfmisData[idx] = newRow; else gfmisData.push(newRow);
+    });
+    gfmisData.sort((a,b)=>a.code.localeCompare(b.code));
+    try{
+      const existing = await window.storage.get('pam_gfmis_extra',false).catch(()=>null);
+      const list = existing && existing.value ? JSON.parse(existing.value) : [];
+      list.push(...bulkParsedRows);
+      await window.storage.set('pam_gfmis_extra', JSON.stringify(list), false);
+    }catch(e){ console.warn('บันทึกลง storage ไม่สำเร็จ', e); }
+    closeBulk();
+    renderAll();
+    return;
+  }
+  const map = {deposit:{arr:depositData,key:'pam_deposit_extra'}, bks:{arr:bksData,key:'pam_bks_extra'}, gfmisacct:{arr:gfmisAcctData,key:'pam_gfmisacct_extra'}};
+  const {arr,key} = map[type];
+  const added = bulkParsedRows;
+  arr.push(...added);
+  arr.sort((a,b)=>a.date.localeCompare(b.date));
+  if(type==='bks' || type==='gfmisacct'){
+    // คำนวณยอดคงเหลือสะสมใหม่ทั้งบัญชีตามลำดับวันที่ ให้ถูกต้องเสมอแม้แทรกรายการกลางไทม์ไลน์
+    const baseline = arr[0].bal - (arr[0].in||0) + (arr[0].out||0);
+    let running = baseline;
+    arr.forEach(r=>{ running += (r.in||0) - (r.out||0); r.bal = Math.round(running*100)/100; });
+  }
+  try{
+    const existing = await window.storage.get(key,false).catch(()=>null);
+    const list = existing && existing.value ? JSON.parse(existing.value) : [];
+    list.push(...added);
+    await window.storage.set(key, JSON.stringify(list), false);
+  }catch(e){ console.warn('บันทึกลง storage ไม่สำเร็จ', e); }
+  closeBulk();
   renderAll();
 }
 
